@@ -3,15 +3,15 @@ package ahodanenok.reactivestreams;
 import org.reactivestreams.*;
 import org.reactivestreams.tck.*;
 
-public class OnceValueVerificationTest extends PublisherVerification<Integer> {
+public class OnceNeverVerificationTest extends PublisherVerification<Integer> {
 
-    public OnceValueVerificationTest() {
+    public OnceNeverVerificationTest() {
         super(new TestEnvironment());
     }
 
     @Override
     public Publisher<Integer> createPublisher(long elements) {
-        return new OnceValue(0);
+        return new OnceNever<Integer>();
     }
 
     @Override
@@ -19,8 +19,9 @@ public class OnceValueVerificationTest extends PublisherVerification<Integer> {
         return null;
     }
 
-    @Override public long maxElementsFromPublisher() {
-        return 1;
+    @Override
+    public long maxElementsFromPublisher() {
+        return 0;
     }
 
     @Override
