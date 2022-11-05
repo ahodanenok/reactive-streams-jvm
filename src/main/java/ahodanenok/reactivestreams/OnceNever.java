@@ -2,7 +2,7 @@ package ahodanenok.reactivestreams;
 
 import org.reactivestreams.*;
 
-public class OnceNever<T> implements Publisher<T> {
+public class OnceNever<T> extends Once<T> {
 
     @Override
     public void subscribe(Subscriber<? super T> s) {

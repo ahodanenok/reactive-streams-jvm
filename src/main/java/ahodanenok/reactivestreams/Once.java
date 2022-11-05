@@ -1,6 +1,7 @@
 package ahodanenok.reactivestreams;
 
 import org.reactivestreams.*;
+import java.util.function.Supplier;
 
 public abstract class Once<T> implements Publisher<T> {
 
@@ -16,5 +17,12 @@ public abstract class Once<T> implements Publisher<T> {
      */
     public static <T> Once<T> never() {
         return new OnceNever();
+    }
+
+    /**
+     * Create publisher that emits the value produced by supplier.
+     */
+    public static <T> Once<T> completed(Supplier<T> supplier) {
+        return new OnceSupplierCompleted(supplier);
     }
 }
