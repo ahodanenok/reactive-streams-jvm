@@ -6,25 +6,18 @@ public class OnceNever<T> extends Once<T> {
 
     @Override
     public void subscribe(Subscriber<? super T> s) {
-        s.onSubscribe(new OnceNeverSub<T>(s));
+        s.onSubscribe(new OnceNeverSubscription<T>(s));
     }
 
-    private static class OnceNeverSub<T> implements Subscription {
+    private static class OnceNeverSubscription<T> extends OnceSubscription<T> {
 
-        private Subscriber<? super T> subscriber;
-
-        OnceNeverSub(Subscriber<? super T> subscriber) {
-            this.subscriber = subscriber;
+        OnceNeverSubscription(Subscriber<? super T> subscriber) {
+            super(subscriber);
         }
 
         @Override
-        public void request(long n) {
-            if (n <= 0) {
-                subscriber.onError(new IllegalArgumentException());
-            }
+        public T requestValue() {
+            throw new IllegalStateException("No value here!");
         }
-
-        @Override
-        public void cancel() { }
     }
 } 

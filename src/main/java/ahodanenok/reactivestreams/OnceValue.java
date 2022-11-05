@@ -10,46 +10,22 @@ public class OnceValue<T> extends Once<T> {
         this.value = value;
     }
 
-    public void subscribe(Subscriber<? super T> s) {
+    public void subscribe(Subscriber<? super T> subscriber) {
         // 2.12, 1.10 - each subsriber must be different,
         // can't subscribe the same subscriber multiple times
 
-        s.onSubscribe(new OnceValueSub(s));
+        subscriber.onSubscribe(new OnceValueSubscription(subscriber));
     }
 
-    class OnceValueSub implements Subscription {
+    class OnceValueSubscription extends OnceSubscription<T> {
 
-        private Subscriber<? super T> subscriber;
-        private volatile boolean cancelled;
-
-        OnceValueSub(Subscriber<? super T> subscriber) {
-            this.subscriber = subscriber;
+        OnceValueSubscription(Subscriber<? super T> subscriber) {
+            super(subscriber);
         }
 
         @Override
-        public void request(long n) {
-            if (n <= 0) {
-                subscriber.onError(new IllegalArgumentException(n + ""));
-                return;
-            }
-
-            if (!cancelled) {
-                // todo: check 2.13
-                // todo: if onNext failed should onError be signalled?
-                subscriber.onNext(value);
-            }
-
-            if (!cancelled) {
-                // todo: check 2.13
-                // todo: if onComplete failed should onError be signalled?
-                subscriber.onComplete();
-                cancel();
-            }
-        }
-
-        @Override
-        public void cancel() {
-            cancelled = true;
+        public T requestValue() {
+            return value;
         }
     }
 }
