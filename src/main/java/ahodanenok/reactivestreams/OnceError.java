@@ -15,7 +15,11 @@ public class OnceError<T> extends Once<T> {
         OnceErrorSubscription<T> subscription = new OnceErrorSubscription<>(subscriber);
         subscriber.onSubscribe(subscription);
         if (!subscription.isCancelled()) {
-            subscriber.onError(throwable);
+            try {
+                subscriber.onError(throwable);
+            } finally {
+                subscription.cancel();
+            }
         }
     }
 

@@ -6,16 +6,20 @@ public class OnceEmpty<T> extends Once<T> {
 
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
-        OnceEmptSubscription<T> subscription = new OnceEmptSubscription<>(subscriber);
+        OnceEmptySubscription<T> subscription = new OnceEmptySubscription<>(subscriber);
         subscriber.onSubscribe(subscription);
         if (!subscription.isCancelled()) {
-            subscriber.onComplete();
+            try {
+                subscriber.onComplete();
+            } finally {
+                subscription.cancel();
+            }
         }
     }
 
-    private static class OnceEmptSubscription<T> extends OnceSubscription<T> {
+    private static class OnceEmptySubscription<T> extends OnceSubscription<T> {
 
-        OnceEmptSubscription(Subscriber<? super T> subscriber) {
+        OnceEmptySubscription(Subscriber<? super T> subscriber) {
             super(subscriber);
         }
 

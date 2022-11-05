@@ -5,8 +5,10 @@ import org.reactivestreams.*;
 public class OnceNever<T> extends Once<T> {
 
     @Override
-    public void subscribe(Subscriber<? super T> s) {
-        s.onSubscribe(new OnceNeverSubscription<T>(s));
+    public void subscribe(Subscriber<? super T> subscriber) {
+        OnceNeverSubscription<T> subscription = new OnceNeverSubscription<>(subscriber);
+        subscriber.onSubscribe(subscription);
+        subscription.cancel(); // todo: finally?
     }
 
     private static class OnceNeverSubscription<T> extends OnceSubscription<T> {
