@@ -19,18 +19,36 @@ public abstract class OnceSubscription<T> implements Subscription {
         }
 
         try {
-            if (n <= 0) {
-                subscriber.onError(
-                    new IllegalArgumentException("Requested amount must be positive: " + n));
-            } else {
-                subscriber.onNext(requestValue());
-                if (!cancelled) {
-                    subscriber.onComplete();
-                }
-            }
+            doRequest(n);
         } finally {
             // 2.13 - if violated then this subscription will be cancelled
             cancel();
+        }
+    }
+
+    private void doRequest(long n) {
+        if (n <= 0) {
+            subscriber.onError(
+                new IllegalArgumentException("Requested amount must be positive: " + n));
+        } else {
+            T value;
+            try {
+                value = requestValue();
+            } catch (Throwable e) {
+                e.printStackTrace(); // todo: log
+                subscriber.onError(e);
+                return;
+            }
+
+            if (value == null) {
+                // todo: are nulls allowed?
+                throw new NullPointerException();
+            }
+
+            subscriber.onNext(value);
+            if (!cancelled) {
+                subscriber.onComplete();
+            }
         }
     }
 

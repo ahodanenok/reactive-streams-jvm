@@ -13,17 +13,17 @@ public abstract class Once<T> implements Publisher<T> {
     }
 
     /**
+     * Create publisher that emits the value produced by supplier.
+     */
+    public static <T> Once<T> value(Supplier<T> supplier) {
+        return new OnceValueSupplier<T>(supplier);
+    }
+
+    /**
      * Crete publisher that never emits any signal except onSubscribe.
      */
     public static <T> Once<T> never() {
         return new OnceNever<T>();
-    }
-
-    /**
-     * Create publisher that emits the value produced by supplier.
-     */
-    public static <T> Once<T> completed(Supplier<T> supplier) {
-        return new OnceSupplierCompleted<T>(supplier);
     }
 
     /**

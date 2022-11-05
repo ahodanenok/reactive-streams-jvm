@@ -3,15 +3,15 @@ package ahodanenok.reactivestreams;
 import org.reactivestreams.*;
 import org.reactivestreams.tck.*;
 
-public class OnceSupplierCompletedVerificationTest extends PublisherVerification<String> {
+public class OnceValueSupplierVerificationTest extends PublisherVerification<String> {
 
-    public OnceSupplierCompletedVerificationTest() {
+    public OnceValueSupplierVerificationTest() {
         super(new TestEnvironment());
     }
 
     @Override
     public Publisher<String> createPublisher(long elements) {
-        return new OnceSupplierCompleted<>(() -> "hello!");
+        return new OnceValueSupplier<>(() -> "hello!");
     }
 
     @Override
