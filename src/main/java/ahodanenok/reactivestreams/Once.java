@@ -27,10 +27,17 @@ public abstract class Once<T> implements Publisher<T> {
     }
 
     /**
-     * Create publisher that immediatly completes after subscribing to it
+     * Create publisher that immediately completes after subscribing to it
      * without emitting any values. 
      */
     public static <T> Once<T> empty() {
         return new OnceEmpty<T>();
+    }
+
+    /**
+     * Create publisher that immediately completes with error signal.
+     */
+    public static <T> Once<T> error(Throwable throwable) {
+        return new OnceError<T>(throwable);
     }
 }
