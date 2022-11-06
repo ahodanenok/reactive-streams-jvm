@@ -26,7 +26,9 @@ public class OncePublisherCompleted<T> extends Once<T> {
         }
 
         @Override
-        public void onSubscribe(Subscription s) { /* no-op */ }
+        public void onSubscribe(Subscription s) {
+            // todo: cancel upstream subscription if downstream cancelled its (onCancel)
+        }
 
         @Override
         public void onError(Throwable e) {
