@@ -6,7 +6,7 @@ import org.reactivestreams.Subscription;
 public abstract class OnceSubscription<T> implements Subscription {
 
     private final Subscriber<? super T> subscriber;
-    private boolean cancelled;
+    private volatile boolean cancelled; // 3.5
 
     protected OnceSubscription(Subscriber<? super T> subscriber) {
         this.subscriber = subscriber;
@@ -15,19 +15,18 @@ public abstract class OnceSubscription<T> implements Subscription {
     @Override
     public final void request(long n) {
         if (cancelled) {
-            return;
+            return; // 3.6
         }
 
-        if (n <= 0) {
+        if (n <= 0) { // 3.9
             complete(new IllegalArgumentException("Requested amount must be positive: " + n));
         }
 
         try {
             onRequest();
         } catch (Throwable e) {
-            // 2.13 - if violated then this subscription will be cancelled
-            cancel();
-            throw e;
+            // 3.16
+            cancel(); // 2.13
         }
     }
 
@@ -35,19 +34,19 @@ public abstract class OnceSubscription<T> implements Subscription {
 
     protected final void complete(Throwable e) {
         if (cancelled) {
-            return;
+            return; // 1.7, 1.8
         }
 
         try {
             subscriber.onError(e);
         } finally {
-            cancel();
+            cancel(); // 2.4
         }
     }
 
     protected final void complete(T value) {
         if (cancelled) {
-            return;
+            return; // 1.7, 1.8
         }
 
         if (value == null) {
@@ -57,21 +56,26 @@ public abstract class OnceSubscription<T> implements Subscription {
 
         try {
             subscriber.onNext(value);
-            complete();
-        } finally {
+        } catch (Throwable e) {
+            // it is expected that the subscriber will be wrapped by SubscriberWrapper
+            // where the subscription will be cancelled in case of error, so maybe
+            // there is no need to cancel it here
             cancel();
+            throw e;
         }
+
+        complete();
     }
 
     protected final void complete() {
         if (cancelled) {
-            return;
+            return; // 1.7, 1.8
         }
 
         try {
             subscriber.onComplete();
         } finally {
-            cancel();
+            cancel(); // 2.4
         }
     }
 
@@ -81,6 +85,6 @@ public abstract class OnceSubscription<T> implements Subscription {
 
     @Override
     public final void cancel() {
-        cancelled = true;
+        cancelled = true; // 3.7, 3.16
     }
 }
