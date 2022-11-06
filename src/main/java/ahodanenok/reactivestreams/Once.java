@@ -59,7 +59,7 @@ public abstract class Once<T> implements Publisher<T> {
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
         if (subscriber == null) {
-            throw new NullPointerException("subscriber"); // 1.9
+            throw new NullPointerException("subscribe: subscriber is null"); // 1.9
         }
 
         // todo: enforce 1.10?

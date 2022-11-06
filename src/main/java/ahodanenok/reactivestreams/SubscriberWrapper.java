@@ -15,23 +15,35 @@ public final class SubscriberWrapper<T> implements Subscriber<T> {
 
     @Override
     public void onSubscribe(Subscription subscription) {
+        if (subscription == null) {
+            // 2.13
+            subscription.cancel();
+            throw new NullPointerException("onSubscribe: subscription is null"); 
+        }
+
         this.subscription = subscription; // todo: 2.12?
 
         try {
             subscriber.onSubscribe(subscription);
         } catch (Throwable e) {
+            e.printStackTrace(); // todo: log
             subscription.cancel(); // 2.13
-            throw e;
         }
     }
 
     @Override
     public void onNext(T value) {
+        if (value == null) {
+            // 2.13
+            subscription.cancel();
+            throw new NullPointerException("onNext: value is null"); 
+        }
+
         try {
             subscriber.onNext(value);
         } catch (Throwable e) {
+            e.printStackTrace(); // todo: log
             subscription.cancel(); // 2.13
-            throw e;
         }
     }
 
@@ -40,8 +52,8 @@ public final class SubscriberWrapper<T> implements Subscriber<T> {
         try {
             subscriber.onComplete();
         } catch (Throwable e) {
+            e.printStackTrace(); // todo: log
             subscription.cancel(); // 2.13
-            throw e;
         }
     }
 
@@ -50,8 +62,8 @@ public final class SubscriberWrapper<T> implements Subscriber<T> {
         try {
             subscriber.onError(e);
         } catch (Throwable unexpected) {
+            unexpected.printStackTrace(); // todo: log
             subscription.cancel(); // 2.13
-            throw unexpected;
         }
     }
 }
