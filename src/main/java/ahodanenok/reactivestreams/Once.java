@@ -47,4 +47,16 @@ public abstract class Once<T> implements Publisher<T> {
     public static <T> Once<T> publisherCompleted(Publisher<T> publisher) {
         return new OncePublisherCompleted<>(publisher);
     }
+
+    @Override
+    public void subscribe(Subscriber<? super T> subscriber) {
+        if (subscriber == null) {
+            throw new NullPointerException("subscriber"); // 1.9
+        }
+
+        // todo: enforce 1.10?
+        doSubscribe(new SubscriberWrapper(subscriber));
+    }
+
+    protected void doSubscribe(Subscriber<? super T> subscriber) { };
 }
