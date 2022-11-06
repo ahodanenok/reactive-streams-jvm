@@ -24,8 +24,8 @@ public class OnceValue<T> extends Once<T> {
         }
 
         @Override
-        public T requestValue() {
-            return value;
+        protected void onRequest() {
+            complete(value);
         }
     }
 }

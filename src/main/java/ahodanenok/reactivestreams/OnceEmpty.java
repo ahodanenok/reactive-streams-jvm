@@ -8,6 +8,7 @@ public class OnceEmpty<T> extends Once<T> {
     public void subscribe(Subscriber<? super T> subscriber) {
         OnceEmptySubscription<T> subscription = new OnceEmptySubscription<>(subscriber);
         subscriber.onSubscribe(subscription);
+        // todo: i can use subscription.complete() to singal completion
         if (!subscription.isCancelled()) {
             try {
                 subscriber.onComplete();
@@ -21,11 +22,6 @@ public class OnceEmpty<T> extends Once<T> {
 
         OnceEmptySubscription(Subscriber<? super T> subscriber) {
             super(subscriber);
-        }
-
-        @Override
-        public T requestValue() {
-            throw new IllegalStateException("No value here!");
         }
     }
 } 

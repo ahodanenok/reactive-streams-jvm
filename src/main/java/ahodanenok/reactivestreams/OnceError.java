@@ -14,6 +14,7 @@ public class OnceError<T> extends Once<T> {
     public void subscribe(Subscriber<? super T> subscriber) {
         OnceErrorSubscription<T> subscription = new OnceErrorSubscription<>(subscriber);
         subscriber.onSubscribe(subscription);
+        // todo: i can use subscription.complete(error) to singal onError
         if (!subscription.isCancelled()) {
             try {
                 subscriber.onError(throwable);
@@ -27,11 +28,6 @@ public class OnceError<T> extends Once<T> {
 
         OnceErrorSubscription(Subscriber<? super T> subscriber) {
             super(subscriber);
-        }
-
-        @Override
-        public T requestValue() {
-            throw new IllegalStateException("No value here!");
         }
     }
 } 

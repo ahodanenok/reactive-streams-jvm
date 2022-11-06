@@ -22,8 +22,8 @@ public class OnceValueSupplier<T> extends Once<T> {
         }
 
         @Override
-        protected T requestValue() {
-            return supplier.get();
+        protected void onRequest() {
+            complete(supplier.get());
         }
     }
 }

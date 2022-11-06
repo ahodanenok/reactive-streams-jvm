@@ -8,6 +8,7 @@ public class OnceNever<T> extends Once<T> {
     public void subscribe(Subscriber<? super T> subscriber) {
         OnceNeverSubscription<T> subscription = new OnceNeverSubscription<>(subscriber);
         subscriber.onSubscribe(subscription);
+        // todo: hmm, i shouldn't do it this way
         subscription.cancel(); // todo: finally?
     }
 
@@ -15,11 +16,6 @@ public class OnceNever<T> extends Once<T> {
 
         OnceNeverSubscription(Subscriber<? super T> subscriber) {
             super(subscriber);
-        }
-
-        @Override
-        public T requestValue() {
-            throw new IllegalStateException("No value here!");
         }
     }
 } 
