@@ -42,6 +42,14 @@ public abstract class Once<T> implements Publisher<T> {
     }
 
     /**
+     * Create publisher that subscribes all subscribers
+     * to the publisher returned by the supllier.
+     */
+    public static <T> Once<T> defer(Supplier<? extends Once<T>> supplier) {
+        return new OnceDefer<>(supplier);
+    }
+
+    /**
      * Create publisher that completes when the given publisher completes. 
      */
     public static <T> Once<T> publisherCompleted(Publisher<T> publisher) {
