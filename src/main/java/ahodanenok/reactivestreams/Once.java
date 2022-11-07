@@ -72,8 +72,13 @@ public abstract class Once<T> implements Publisher<T> {
         }
 
         // todo: enforce 1.10?
-        doSubscribe(new SubscriberWrapper(subscriber));
+        try {
+            doSubscribe(new SubscriberWrapper(subscriber));
+        } catch (Throwable e) {
+            // todo: log
+            e.printStackTrace(); // 1.9
+        }
     }
 
-    protected void doSubscribe(Subscriber<? super T> subscriber) { };
+    protected void doSubscribe(Subscriber<? super T> subscriber) throws Throwable { };
 }
