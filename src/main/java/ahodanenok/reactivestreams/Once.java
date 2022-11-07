@@ -2,6 +2,7 @@ package ahodanenok.reactivestreams;
 
 import org.reactivestreams.*;
 import java.util.function.Supplier;
+import java.util.Arrays;
 
 public abstract class Once<T> implements Publisher<T> {
 
@@ -54,6 +55,14 @@ public abstract class Once<T> implements Publisher<T> {
      */
     public static <T> Once<T> publisherCompleted(Publisher<T> publisher) {
         return new OncePublisherCompleted<>(publisher);
+    }
+
+    /**
+     * Create publisher that completes when all publishers complete
+     * or fails if one of them fails.
+     */
+    public static <T> Once<T> every(Publisher<?>... publishers) {
+        return new OnceEveryPublisherCompleted<>(Arrays.asList(publishers));
     }
 
     @Override

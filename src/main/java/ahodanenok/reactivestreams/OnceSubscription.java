@@ -85,6 +85,16 @@ public abstract class OnceSubscription<T> implements Subscription {
 
     @Override
     public final void cancel() {
-        cancelled = true; // 3.7, 3.16
+        // todo: thread safety
+        if (!cancelled) { // 3.7
+            cancelled = true;
+            try {
+                onCancel();
+            } catch (Throwable e) { // 3.16
+                e.printStackTrace(); // todo: log
+            }
+        }
     }
+
+    protected void onCancel() { }
 }
