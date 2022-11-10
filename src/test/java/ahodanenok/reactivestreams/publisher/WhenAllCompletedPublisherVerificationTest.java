@@ -13,12 +13,18 @@ public class WhenAllCompletedPublisherVerificationTest extends PublisherVerifica
 
     @Override
     public Publisher<String> createPublisher(long elements) {
-        return new WhenAllCompletedPublisher<>(List.of(new ValuePublisher<>(0), new ValuePublisher<>(5), new ValuePublisher<>(10)));
+        return new WhenAllCompletedPublisher<>(List.of(
+            new ValuePublisher<>(0), 
+            new ValuePublisher<>(5),
+            new ValuePublisher<>(10)));
     }
 
     @Override
     public Publisher<String> createFailedPublisher() {
-        return null;
+        return new WhenAllCompletedPublisher<>(List.of(
+            new ValuePublisher<>(0),
+            new ErrorPublisher<>(new RuntimeException("error")),
+            new ValuePublisher<>(10)));
     }
 
     @Override public long maxElementsFromPublisher() {
