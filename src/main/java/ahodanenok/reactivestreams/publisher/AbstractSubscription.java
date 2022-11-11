@@ -1,4 +1,4 @@
-package ahodanenok.reactivestreams;
+package ahodanenok.reactivestreams.publisher;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -24,7 +24,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
         }
 
         try {
-            onRequest();
+            onRequest(n);
         } catch (Throwable e) {
             // 3.16
             cancel(); // 2.13
@@ -32,7 +32,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
         }
     }
 
-    protected void onRequest() { };
+    protected void onRequest(long n) { };
 
     public final boolean isCancelled() {
         return cancelled;
@@ -49,8 +49,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
 
     protected void onCancel() { }
 
-
-    public void complete(T value) {
+    public void value(T value) {
         if (cancelled) {
             return; // 1.7, 1.8
         }
@@ -59,14 +58,17 @@ public abstract class AbstractSubscription<T> implements Subscription {
             // todo: are nulls allowed?
             throw new NullPointerException();
         }
-
+        
         try {
             subscriber.onNext(value);
         } catch (Throwable e) {
             cancel();
             throw e; // todo: looks like wrong behavior, check it
         }
+    }
 
+    public void complete(T value) {
+        value(value);
         complete();
     }
 

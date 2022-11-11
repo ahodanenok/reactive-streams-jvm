@@ -30,9 +30,9 @@ public abstract class OnceSubscription<T> implements Subscription {
         }
     }
 
-    protected void onRequest() { };
+    protected void onRequest() throws Throwable { };
 
-    protected final void complete(Throwable e) {
+    public final void complete(Throwable e) {
         if (cancelled) {
             return; // 1.7, 1.8
         }
@@ -44,7 +44,7 @@ public abstract class OnceSubscription<T> implements Subscription {
         }
     }
 
-    protected final void complete(T value) {
+    public final void complete(T value) {
         if (cancelled) {
             return; // 1.7, 1.8
         }
@@ -67,7 +67,7 @@ public abstract class OnceSubscription<T> implements Subscription {
         complete();
     }
 
-    protected final void complete() {
+    public final void complete() {
         if (cancelled) {
             return; // 1.7, 1.8
         }
@@ -96,5 +96,5 @@ public abstract class OnceSubscription<T> implements Subscription {
         }
     }
 
-    protected void onCancel() { }
+    protected void onCancel() throws Throwable { }
 }

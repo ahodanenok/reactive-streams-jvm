@@ -1,7 +1,7 @@
-package ahodanenok.reactivestreams;
+package ahodanenok.reactivestreams.publisher;
 
 import java.util.function.Function;
-import org.reactivestreams.*;;
+import org.reactivestreams.*;
 
 public class MapPublisher<T, R> extends AbstractPublisher<R> {
 

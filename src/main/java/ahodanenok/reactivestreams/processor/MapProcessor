@@ -1,0 +1,50 @@
+package ahodanenok.reactivestreams.processor;
+
+import org.reactivestreams.*;
+
+public class MapProcessor<T, R> implements Processor<T, R> {
+
+    private final Function<T, R> mapper;
+
+    public MapProcessor(Function<T, R> mapper) {
+        this.mapper = mapper;
+    }
+
+    @Override
+    public void subscribe(Subscriber<? super T> subscriber) {
+        subscriber.onSubscribe(?);
+    }
+
+    @Override
+    public void onSubscribe(Subscription upstream) {
+
+    }
+
+    @Override
+    public void onNext(T value) {
+
+    }
+
+    @Override
+    public void onComplete() {
+
+    }
+
+    @Override
+    public void onError(Throwable e) {
+
+    }
+
+    class MapProcessorSubscription implements Subscription {
+
+        @Override
+        public void request(long n) {
+
+        }
+
+        @Override
+        public void cancel() {
+            
+        }
+    }
+}

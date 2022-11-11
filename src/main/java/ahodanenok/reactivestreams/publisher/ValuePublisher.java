@@ -1,4 +1,4 @@
-package ahodanenok.reactivestreams;
+package ahodanenok.reactivestreams.publisher;
 
 import org.reactivestreams.Subscriber;
 
@@ -25,7 +25,7 @@ public class ValuePublisher<T> extends AbstractPublisher<T> {
         }
 
         @Override
-        protected void onRequest() {
+        protected void onRequest(long n) {
             complete(value);
         }
     }

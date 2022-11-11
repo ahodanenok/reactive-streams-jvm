@@ -1,4 +1,4 @@
-package ahodanenok.reactivestreams;
+package ahodanenok.reactivestreams.publisher;
 
 import java.util.List;
 import org.reactivestreams.Publisher;
