@@ -26,6 +26,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
         try {
             onRequest(n);
         } catch (Throwable e) {
+            e.printStackTrace();
             // 3.16
             cancel(); // 2.13
             // todo: throw?
