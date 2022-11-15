@@ -1,23 +1,29 @@
-package ahodanenok.reactivestreams.publisher;
+package ahodanenok.reactivestreams.publisher.verification;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
 
-public class IntRangePublisherVerificationTest extends PublisherVerification<Integer> {
+import ahodanenok.reactivestreams.publisher.ValuePublisher;
 
-    public IntRangePublisherVerificationTest() {
+public class ValuePublisherVerificationTest extends PublisherVerification<Integer> {
+
+    public ValuePublisherVerificationTest() {
         super(new TestEnvironment());
     }
 
     @Override
     public Publisher<Integer> createPublisher(long elements) {
-        return new IntRangePublisher(0, (int) elements);
+        return new ValuePublisher<>(0);
     }
 
     @Override
     public Publisher<Integer> createFailedPublisher() {
         return null;
+    }
+
+    @Override public long maxElementsFromPublisher() {
+        return 1;
     }
 
     @Override

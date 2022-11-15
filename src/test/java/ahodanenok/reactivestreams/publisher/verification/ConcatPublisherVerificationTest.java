@@ -1,9 +1,12 @@
-package ahodanenok.reactivestreams.publisher;
+package ahodanenok.reactivestreams.publisher.verification;
 
 import java.util.List;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
+
+import ahodanenok.reactivestreams.publisher.ConcatPublisher;
+import ahodanenok.reactivestreams.publisher.IntRangePublisher;
 
 public class ConcatPublisherVerificationTest extends PublisherVerification<Integer> {
 

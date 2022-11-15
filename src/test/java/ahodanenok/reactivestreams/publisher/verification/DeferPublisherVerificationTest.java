@@ -1,7 +1,11 @@
-package ahodanenok.reactivestreams.publisher;
+package ahodanenok.reactivestreams.publisher.verification;
 
 import org.reactivestreams.*;
 import org.reactivestreams.tck.*;
+
+import ahodanenok.reactivestreams.publisher.DeferPublisher;
+import ahodanenok.reactivestreams.publisher.ValuePublisher;
+import ahodanenok.reactivestreams.publisher.ErrorPublisher;
 
 public class DeferPublisherVerificationTest extends PublisherVerification<Integer> {
 

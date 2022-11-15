@@ -1,7 +1,9 @@
-package ahodanenok.reactivestreams.publisher;
+package ahodanenok.reactivestreams.publisher.verification;
 
 import org.reactivestreams.*;
 import org.reactivestreams.tck.*;
+
+import ahodanenok.reactivestreams.publisher.FromCallbackPublisher;
 
 public class FromCallbackPublisherOneVerificationTest extends PublisherVerification<String> {
 

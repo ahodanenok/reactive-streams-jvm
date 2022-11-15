@@ -1,19 +1,23 @@
-package ahodanenok.reactivestreams.publisher;
+package ahodanenok.reactivestreams.publisher.verification;
 
 import java.util.List;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
 
-public class WhenAllCompletedPublisherVerificationTest extends PublisherVerification<String> {
+import ahodanenok.reactivestreams.publisher.WhenAnyCompletedPublisher;
+import ahodanenok.reactivestreams.publisher.ValuePublisher;
+import ahodanenok.reactivestreams.publisher.ErrorPublisher;
 
-    public WhenAllCompletedPublisherVerificationTest() {
+public class WhenAnyCompletedPublisherVerificationTest extends PublisherVerification<String> {
+
+    public WhenAnyCompletedPublisherVerificationTest() {
         super(new TestEnvironment());
     }
 
     @Override
     public Publisher<String> createPublisher(long elements) {
-        return new WhenAllCompletedPublisher<>(List.of(
+        return new WhenAnyCompletedPublisher<>(List.of(
             new ValuePublisher<>(0), 
             new ValuePublisher<>(5),
             new ValuePublisher<>(10)));
@@ -21,7 +25,7 @@ public class WhenAllCompletedPublisherVerificationTest extends PublisherVerifica
 
     @Override
     public Publisher<String> createFailedPublisher() {
-        return new WhenAllCompletedPublisher<>(List.of(
+        return new WhenAnyCompletedPublisher<>(List.of(
             new ValuePublisher<>(0),
             new ErrorPublisher<>(new RuntimeException("error")),
             new ValuePublisher<>(10)));
