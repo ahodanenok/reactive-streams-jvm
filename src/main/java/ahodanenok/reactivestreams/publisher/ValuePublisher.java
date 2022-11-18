@@ -1,5 +1,6 @@
 package ahodanenok.reactivestreams.publisher;
 
+import java.util.Objects;
 import org.reactivestreams.Subscriber;
 
 public class ValuePublisher<T> extends AbstractPublisher<T> {
@@ -7,6 +8,7 @@ public class ValuePublisher<T> extends AbstractPublisher<T> {
     private final T value;
 
     public ValuePublisher(T value) {
+        Objects.requireNonNull(value, "value");
         this.value = value;
     }
 
