@@ -6,8 +6,7 @@ public class NeverPublisher<T> extends AbstractPublisher<T> {
 
     @Override
     protected void doSubscribe(Subscriber<? super T> subscriber) {
-        NeverPublisherSubscription<T> subscription = new NeverPublisherSubscription<>(subscriber);
-        subscriber.onSubscribe(subscription);
+        subscriber.onSubscribe(new NeverPublisherSubscription<>(subscriber));
     }
 
     static class NeverPublisherSubscription<T> extends AbstractSubscription<T> {
