@@ -66,7 +66,7 @@ public class ValuePublisherTest {
         ValuePublisher<String> publisher = new ValuePublisher<>("test_" + count);
         publisher.subscribe(subscriber);
         subscriber.request(count);
-        subscriber.expectError(IllegalArgumentException.class);      
-        subscriber.expectNone();  
+        subscriber.expectError(IllegalArgumentException.class);
+        subscriber.expectNone();
     }
 }

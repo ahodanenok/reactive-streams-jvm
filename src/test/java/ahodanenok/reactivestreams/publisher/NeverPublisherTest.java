@@ -36,7 +36,7 @@ public class NeverPublisherTest {
         NeverPublisher<String> publisher = new NeverPublisher<>();
         publisher.subscribe(subscriber);
         subscriber.request(count);
-        subscriber.expectError(IllegalArgumentException.class);      
-        subscriber.expectNone();  
+        subscriber.expectError(IllegalArgumentException.class);
+        subscriber.expectNone();
     }
 }
