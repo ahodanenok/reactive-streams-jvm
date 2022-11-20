@@ -8,50 +8,51 @@ public class IntRangePublisher extends AbstractPublisher<Integer> {
     private final int to;
 
     public IntRangePublisher(int from, int to) {
+        if (from > to) {
+            throw new IllegalArgumentException("from > to");
+        }
+
         this.from = from;
         this.to = to;
     }
 
     @Override
     protected void doSubscribe(Subscriber<? super Integer> subscriber) {
-        subscriber.onSubscribe(new IntRangePublisherSubscription(subscriber, from, to));
+        IntRangePublisherSubscription subscription =
+            new IntRangePublisherSubscription(subscriber, from, to);
+        subscriber.onSubscribe(subscription);
+        if (from == to) {
+            subscription.complete();
+        }
     }
 
     static class IntRangePublisherSubscription extends AbstractSubscription<Integer> {
 
         private int current;
         private final int to;
-
-        private volatile long requested;
-        private long emitted;
-        private boolean emitting;
+        private final RequestedSupport requestedSupport;
 
         IntRangePublisherSubscription(Subscriber<? super Integer> subscriber, int from, int to) {
             super(subscriber);
             this.current = current;
             this.to = to;
+            this.requestedSupport = new RequestedSupport(this::next);
         }
 
         @Override
         protected void onRequest(long n) {
-            requested = Utils.addRequested(requested, n);
-            if (emitting) {
-                return;
-            }
+            requestedSupport.request(n);
+        }
 
-            emitting = true;
-            try {
-                while (current < to && emitted < requested) {
-                    if (isCancelled()) {
-                        break;
-                    }
+        @Override
+        protected void onCancel() {
+            requestedSupport.cancel();
+        }
 
-                    value(current);
-                    current++;
-                    emitted++;
-                }
-            } finally {
-                emitting = false;
+        private void next() {
+            if (current < to) {
+                value(current);
+                current++;
             }
 
             if (current == to) {
