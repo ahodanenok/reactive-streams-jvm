@@ -26,7 +26,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
     protected void onInit() { }
 
     @Override
-    public void request(long n) {
+    public final void request(long n) {
         if (cancelled) {
             return;
         }
@@ -51,7 +51,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
     }
 
     @Override
-    public void cancel() {
+    public final void cancel() {
         // todo: thread safety
         if (!cancelled) {
             cancelled = true;
@@ -65,7 +65,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
 
     protected void onCancel() { }
 
-    public void value(T value) {
+    public final void value(T value) {
         if (cancelled) {
             return;
         }
@@ -83,12 +83,12 @@ public abstract class AbstractSubscription<T> implements Subscription {
         }
     }
 
-    public void complete(T value) {
+    public final void complete(T value) {
         value(value);
         complete();
     }
 
-    public void complete() {
+    public final void complete() {
         if (cancelled) {
             return;
         }
