@@ -12,6 +12,19 @@ public abstract class AbstractSubscription<T> implements Subscription {
         this.subscriber = subscriber;
     }
 
+    public final void init() {
+        subscriber.onSubscribe(this);
+
+        try {
+            onInit();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            error(e);
+        }
+    }
+
+    protected void onInit() { }
+
     @Override
     public void request(long n) {
         if (cancelled) {
