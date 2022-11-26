@@ -28,10 +28,10 @@ public abstract class AbstractSubscription<T> implements Subscription {
     @Override
     public void request(long n) {
         if (cancelled) {
-            return; // 3.6
+            return;
         }
 
-        if (n <= 0) { // 3.9
+        if (n <= 0) {
             error(new IllegalArgumentException("Requested amount must be positive: " + n));
             return;
         }
@@ -40,9 +40,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
             onRequest(n);
         } catch (Throwable e) {
             e.printStackTrace();
-            // 3.16
-            cancel(); // 2.13
-            // todo: throw?
+            cancel();
         }
     }
 
@@ -55,9 +53,13 @@ public abstract class AbstractSubscription<T> implements Subscription {
     @Override
     public void cancel() {
         // todo: thread safety
-        if (!cancelled) { // 3.7
+        if (!cancelled) {
             cancelled = true;
-            onCancel();
+            try {
+                onCancel();
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -65,19 +67,19 @@ public abstract class AbstractSubscription<T> implements Subscription {
 
     public void value(T value) {
         if (cancelled) {
-            return; // 1.7, 1.8
+            return;
         }
 
         if (value == null) {
-            // todo: are nulls allowed?
-            throw new NullPointerException();
+            cancel();
+            throw new NullPointerException("value");
         }
-        
+
         try {
             subscriber.onNext(value);
         } catch (Throwable e) {
+            e.printStackTrace();
             cancel();
-            throw e; // todo: looks like wrong behavior, check it
         }
     }
 
@@ -88,25 +90,30 @@ public abstract class AbstractSubscription<T> implements Subscription {
 
     public void complete() {
         if (cancelled) {
-            return; // 1.7, 1.8
+            return;
         }
 
         try {
             subscriber.onComplete();
         } finally {
-            cancel(); // 2.4
+            cancel();
         }
     }
 
     public final void error(Throwable e) {
         if (cancelled) {
-            return; // 1.7, 1.8
+            return;
+        }
+
+        if (e == null) {
+            cancel();
+            throw new NullPointerException("value");
         }
 
         try {
             subscriber.onError(e);
         } finally {
-            cancel(); // 2.4
+            cancel();
         }
     }
 }
