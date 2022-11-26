@@ -5,6 +5,9 @@ import org.reactivestreams.Subscription;
 
 public abstract class AbstractSubscription<T> implements Subscription {
 
+    // suports only one subscriber
+    // it maybe located on a different thread than publisher
+
     private final Subscriber<? super T> subscriber;
     private volatile boolean cancelled;
 
@@ -52,7 +55,6 @@ public abstract class AbstractSubscription<T> implements Subscription {
 
     @Override
     public final void cancel() {
-        // todo: thread safety
         if (!cancelled) {
             cancelled = true;
             try {
