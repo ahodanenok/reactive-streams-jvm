@@ -3,22 +3,22 @@ package ahodanenok.reactivestreams.publisher.verification;
 import org.reactivestreams.*;
 import org.reactivestreams.tck.*;
 
-import ahodanenok.reactivestreams.publisher.FromCallbackPublisher;
+import ahodanenok.reactivestreams.publisher.CreatePublisher;
 
-public class FromCallbackPublisherOneVerificationTest extends PublisherVerification<String> {
+public class CreatePublisherVerificationTest extends PublisherVerification<String> {
 
-    public FromCallbackPublisherOneVerificationTest() {
+    public CreatePublisherVerificationTest() {
         super(new TestEnvironment());
     }
 
     @Override
     public Publisher<String> createPublisher(long elements) {
-        return new FromCallbackPublisher<String>(callback -> callback.setOnRequest(n -> callback.complete("hello!")));
+        return new CreatePublisher<String>(callback -> callback.setOnRequest(n -> callback.complete("hello!")));
     }
 
     @Override
     public Publisher<String> createFailedPublisher() {
-        return new FromCallbackPublisher<String>(callback -> callback.error(new RuntimeException()));
+        return new CreatePublisher<String>(callback -> callback.error(new RuntimeException()));
     }
 
     @Override

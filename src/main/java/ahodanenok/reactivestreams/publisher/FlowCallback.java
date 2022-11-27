@@ -2,8 +2,7 @@ package ahodanenok.reactivestreams.publisher;
 
 import java.util.function.LongConsumer;
 
-// todo: add ability to check if cancelled?
-public interface PublisherCallback<T> {
+public interface FlowCallback<T> {
 
     void setOnRequest(LongConsumer action);
 
@@ -16,4 +15,6 @@ public interface PublisherCallback<T> {
     void complete();
 
     void error(Throwable e);
+
+    boolean isCancelled();
 }
