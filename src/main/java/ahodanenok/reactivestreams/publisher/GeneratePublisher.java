@@ -42,8 +42,8 @@ public class GeneratePublisher<T> extends AbstractPublisher<T> {
         }
 
         @Override
-        protected void onCancel() {
-            requestedSupport.cancel();
+        protected void onDispose() {
+            requestedSupport.dispose();
         }
 
         @Override
@@ -64,7 +64,12 @@ public class GeneratePublisher<T> extends AbstractPublisher<T> {
 
         private void next() {
             allowNext = true;
-            generator.accept(prev, this);
+            try {
+                generator.accept(prev, this);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                error(e);
+            }
         }
     }
 }

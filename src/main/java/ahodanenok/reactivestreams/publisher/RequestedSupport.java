@@ -7,7 +7,7 @@ public class RequestedSupport<T> {
     private volatile long requested;
     private long emitted;
     private volatile boolean emitting;
-    private volatile boolean cancelled;
+    private volatile boolean disposed;
 
     public RequestedSupport(Runnable action) {
         this.action = action;
@@ -15,14 +15,14 @@ public class RequestedSupport<T> {
 
     public void request(long n) {
         addRequested(n);
-        if (emitting || cancelled) {
+        if (emitting || disposed) {
             return;
         }
 
         emitting = true;
         try {
             while (emitted < requested) {
-                if (cancelled) {
+                if (disposed) {
                     break;
                 }
 
@@ -34,8 +34,8 @@ public class RequestedSupport<T> {
         }
     }
 
-    public void cancel() {
-        cancelled = true;
+    public void dispose() {
+        disposed = true;
     }
 
     private void addRequested(long n) {

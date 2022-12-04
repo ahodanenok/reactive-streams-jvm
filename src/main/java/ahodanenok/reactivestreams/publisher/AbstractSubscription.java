@@ -43,7 +43,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
             onRequest(n);
         } catch (Throwable e) {
             e.printStackTrace();
-            cancel();
+            dispose();
         }
     }
 
@@ -62,6 +62,8 @@ public abstract class AbstractSubscription<T> implements Subscription {
             } catch (Throwable e) {
                 e.printStackTrace();
             }
+
+            dispose();
         }
     }
 
@@ -73,7 +75,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
         }
 
         if (value == null) {
-            cancel();
+            dispose();
             throw new NullPointerException("value");
         }
 
@@ -81,7 +83,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
             subscriber.onNext(value);
         } catch (Throwable e) {
             e.printStackTrace();
-            cancel();
+            dispose();
         }
     }
 
@@ -98,7 +100,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
         try {
             subscriber.onComplete();
         } finally {
-            cancel();
+            dispose();
         }
     }
 
@@ -115,7 +117,18 @@ public abstract class AbstractSubscription<T> implements Subscription {
         try {
             subscriber.onError(e);
         } finally {
-            cancel();
+            dispose();
         }
     }
+
+    private void dispose() {
+        cancelled = true;
+        try {
+            onDispose();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected void onDispose() { }
 }

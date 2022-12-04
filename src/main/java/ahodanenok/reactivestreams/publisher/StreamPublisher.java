@@ -39,8 +39,8 @@ public class StreamPublisher<T> extends AbstractPublisher<T> {
         }
 
         @Override
-        protected void onCancel() {
-            requestedSupport.cancel();
+        protected void onDispose() {
+            requestedSupport.dispose();
             stream.close();
         }
 
@@ -57,7 +57,7 @@ public class StreamPublisher<T> extends AbstractPublisher<T> {
                     stream.close();
                 }
             } catch (Exception e) {
-                stream.close();
+                e.printStackTrace();
                 error(e);
             }
         }

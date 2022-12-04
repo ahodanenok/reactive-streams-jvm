@@ -45,8 +45,8 @@ public class IntRangePublisher extends AbstractPublisher<Integer> {
         }
 
         @Override
-        protected void onCancel() {
-            requestedSupport.cancel();
+        protected void onDispose() {
+            requestedSupport.dispose();
         }
 
         private void next() {

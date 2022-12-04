@@ -38,8 +38,8 @@ public class IterablePublisher<T> extends AbstractPublisher<T> {
         }
 
         @Override
-        protected void onCancel() {
-            requestedSupport.cancel();
+        protected void onDispose() {
+            requestedSupport.dispose();
         }
 
         public void next() {
