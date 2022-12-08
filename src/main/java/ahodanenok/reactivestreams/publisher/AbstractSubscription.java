@@ -121,7 +121,7 @@ public abstract class AbstractSubscription<T> implements Subscription {
         }
     }
 
-    private void dispose() {
+    protected final void dispose() {
         cancelled = true;
         try {
             onDispose();
