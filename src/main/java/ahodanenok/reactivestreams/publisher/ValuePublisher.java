@@ -20,6 +20,7 @@ public class ValuePublisher<T> extends AbstractPublisher<T> {
     static class ValuePublisherSubscription<T> extends AbstractSubscription<T> {
 
         private final T value;
+        private boolean signalled;
 
         ValuePublisherSubscription(Subscriber<? super T> subscriber, T value) {
             super(subscriber);
@@ -28,7 +29,10 @@ public class ValuePublisher<T> extends AbstractPublisher<T> {
 
         @Override
         protected void onRequest(long n) {
-            complete(value);
+            if (!signalled) {
+                signalled = true;
+                complete(value);
+            }
         }
     }
 }
