@@ -10,10 +10,10 @@ import org.reactivestreams.tck.TestEnvironment;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
-import ahodanenok.reactivestreams.processor.MapProcessor;
+import ahodanenok.reactivestreams.processor.FilterProcessor;
 import ahodanenok.reactivestreams.publisher.ErrorPublisher;
 
-public class MapProcessorIdentityVerificationTest extends IdentityProcessorVerification<Integer> {
+public class FilterProcessorIdentityVerificationTest extends IdentityProcessorVerification<Integer> {
 
     private ExecutorService executor;
 
@@ -23,13 +23,13 @@ public class MapProcessorIdentityVerificationTest extends IdentityProcessorVerif
     @AfterClass
     public void after() { if (executor != null) executor.shutdown(); }
 
-    public MapProcessorIdentityVerificationTest() {
+    public FilterProcessorIdentityVerificationTest() {
         super(new TestEnvironment());
     }
 
     @Override
     public Processor<Integer, Integer> createIdentityProcessor(int bufferSize) {
-        return new MapProcessor<>(n -> n);       
+        return new FilterProcessor<>(n -> true);       
     }
 
     @Override
