@@ -4,7 +4,7 @@ import java.util.Objects;
 import org.reactivestreams.*;
 import ahodanenok.reactivestreams.publisher.AbstractPublisher;
 
-public abstract class AbstractProcessor<T, R> extends AbstractPublisher<R> implements Processor<T, R> {
+public abstract class AbstractTransformingProcessor<T, R> extends AbstractPublisher<R> implements Processor<T, R> {
 
     protected volatile AbstractProcessorSubscription<T, R> processorSubscription;
 

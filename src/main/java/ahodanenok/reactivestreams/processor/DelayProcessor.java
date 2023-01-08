@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.reactivestreams.*;
 
-public class DelayProcessor<T> extends AbstractProcessor<T, T> {
+public class DelayProcessor<T> extends AbstractTransformingProcessor<T, T> {
 
     private final long delay;
     private final TimeUnit unit;

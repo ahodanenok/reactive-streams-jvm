@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 
 import org.reactivestreams.*;
 
-public class FilterProcessor<T> extends AbstractProcessor<T, T> {
+public class FilterProcessor<T> extends AbstractTransformingProcessor<T, T> {
 
     private final Predicate<T> predicate;
 

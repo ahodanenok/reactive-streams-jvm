@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import org.reactivestreams.*;
 
-public class MapProcessor<T, R> extends AbstractProcessor<T, R> {
+public class MapProcessor<T, R> extends AbstractTransformingProcessor<T, R> {
 
     private final Function<T, R> mapper;
 
