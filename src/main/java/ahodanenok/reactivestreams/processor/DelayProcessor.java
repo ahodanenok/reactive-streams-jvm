@@ -11,6 +11,7 @@ public class DelayProcessor<T> extends AbstractTransformingProcessor<T, T> {
 
     private final long delay;
     private final TimeUnit unit;
+    private ScheduledExecutorService executor;
 
     public DelayProcessor(long delay, TimeUnit unit) {
         if (delay <= 0) {
@@ -24,19 +25,28 @@ public class DelayProcessor<T> extends AbstractTransformingProcessor<T, T> {
 
     @Override
     protected DelayProcessorSubscription<T> createSubscription(Subscriber<? super T> subscriber) {
-        return new DelayProcessorSubscription<>(subscriber, delay, unit);
+        return new DelayProcessorSubscription<>(subscriber);
     }
 
-    static class DelayProcessorSubscription<T> extends AbstractProcessorSubscription<T, T> {
+    @Override
+    protected void processNext(final T value) {
+        executor.schedule(() -> downstream.value(value), delay, unit);
+    }
 
-        private ScheduledExecutorService executor;
-        private final long delay;
-        private final TimeUnit unit;
+    @Override
+    protected void processError(final Throwable e) {
+        executor.schedule(() -> downstream.error(e), delay, unit);
+    }
 
-        DelayProcessorSubscription(Subscriber<? super T> subscriber, long delay, TimeUnit unit) {
+    @Override
+    protected void processComplete() {
+        executor.schedule(() -> downstream.complete(), delay, unit);
+    }
+
+    class DelayProcessorSubscription<T> extends AbstractProcessorSubscription<T> {
+
+        DelayProcessorSubscription(Subscriber<? super T> subscriber) {
             super(subscriber);
-            this.delay = delay;
-            this.unit = unit;
         }
 
         @Override
@@ -48,21 +58,6 @@ public class DelayProcessor<T> extends AbstractTransformingProcessor<T, T> {
         protected void onDispose() {
             executor.shutdown();
             executor = null;
-        }
-
-        @Override
-        protected void processNext(final T value) {
-            executor.schedule(() -> value(value), delay, unit);
-        }
-
-        @Override
-        protected void processError(final Throwable e) {
-            executor.schedule(() -> error(e), delay, unit);
-        }
-
-        @Override
-        protected void processComplete() {
-            executor.schedule(() -> complete(), delay, unit);
         }
     }
 }

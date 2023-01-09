@@ -16,25 +16,22 @@ public class FilterProcessor<T> extends AbstractTransformingProcessor<T, T> {
 
     @Override
     protected FilterProcessorSubscription<T> createSubscription(Subscriber<? super T> subscriber) {
-        return new FilterProcessorSubscription<>(subscriber, predicate);
+        return new FilterProcessorSubscription<>(subscriber);
     }
 
-    static class FilterProcessorSubscription<T> extends AbstractProcessorSubscription<T, T> {
-
-        private final Predicate<T> predicate;
-
-        FilterProcessorSubscription(Subscriber<? super T> subscriber, Predicate<T> predicate) {
-            super(subscriber);
-            this.predicate = predicate;
+    @Override
+    protected void processNext(T value) {
+        if (predicate.test(value)) {
+            downstream.value(value);
+        } else {
+            upstream.request(1);
         }
+    }
 
-        @Override
-        public void processNext(final T value) {
-            if (predicate.test(value)) {
-                value(value);
-            } else {
-                upstream.request(1);
-            }
+    static class FilterProcessorSubscription<T> extends AbstractProcessorSubscription<T> {
+
+        FilterProcessorSubscription(Subscriber<? super T> subscriber) {
+            super(subscriber);
         }
     }
 }

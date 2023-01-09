@@ -7,12 +7,12 @@ import org.reactivestreams.*;
 import ahodanenok.reactivestreams.publisher.AbstractSubscription;
 import ahodanenok.reactivestreams.publisher.Utils;
 
-public abstract class AbstractProcessorSubscription<T, R> extends AbstractSubscription<R> implements Subscriber<T> {
+public abstract class AbstractProcessorSubscription<T> extends AbstractSubscription<T> implements Subscriber<T> {
 
     protected volatile Subscription upstream;
     protected volatile long pendingRequested;
 
-    protected AbstractProcessorSubscription(Subscriber<? super R> subscriber) {
+    protected AbstractProcessorSubscription(Subscriber<? super T> subscriber) {
         super(subscriber);
     }
 
@@ -36,12 +36,6 @@ public abstract class AbstractProcessorSubscription<T, R> extends AbstractSubscr
     public final void onSubscribe(Subscription upstream) {
         Objects.requireNonNull(upstream, "upstream");
 
-        if (this.upstream != null) {
-            // if already subscribed, then cancel incoming subscription
-            upstream.cancel();
-            return;
-        }
-
         this.upstream = upstream;
 
         if (isCancelled()) {
@@ -59,14 +53,12 @@ public abstract class AbstractProcessorSubscription<T, R> extends AbstractSubscr
         }
 
         try {
-            processNext(value);
+            value(value);
         } catch (Throwable e) {
             e.printStackTrace();
             dispose();
         }
     }
-
-    protected abstract void processNext(T value);
 
     @Override
     public final void onError(Throwable e) {
@@ -75,15 +67,11 @@ public abstract class AbstractProcessorSubscription<T, R> extends AbstractSubscr
         }
 
         try {
-            processError(e);
+            error(e);
         } catch (Throwable ex) {
             ex.printStackTrace();
             dispose();
         }
-    }
-
-    protected void processError(Throwable e) {
-        error(e);
     }
 
     @Override
@@ -93,14 +81,10 @@ public abstract class AbstractProcessorSubscription<T, R> extends AbstractSubscr
         }
 
         try {
-            processComplete();
+            complete();
         } catch (Throwable e) {
             e.printStackTrace();
             dispose();
         }
-    }
-
-    protected void processComplete() {
-        complete();
     }
 }

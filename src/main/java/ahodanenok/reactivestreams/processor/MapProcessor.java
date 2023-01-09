@@ -15,22 +15,19 @@ public class MapProcessor<T, R> extends AbstractTransformingProcessor<T, R> {
     }
 
     @Override
-    protected MapProcessorSubscription<T, R> createSubscription(Subscriber<? super R> subscriber) {
-        return new MapProcessorSubscription<>(subscriber, mapper);
+    protected MapProcessorSubscription<R> createSubscription(Subscriber<? super R> subscriber) {
+        return new MapProcessorSubscription<R>(subscriber);
     }
 
-    static class MapProcessorSubscription<T, R> extends AbstractProcessorSubscription<T, R> {
+    @Override
+    protected void processNext(T value) {
+        downstream.value(mapper.apply(value));
+    }
 
-        private final Function<T, R> mapper;
+    static class MapProcessorSubscription<R> extends AbstractProcessorSubscription<R> {
 
-        MapProcessorSubscription(Subscriber<? super R> subscriber, Function<T, R> mapper) {
+        MapProcessorSubscription(Subscriber<? super R> subscriber) {
             super(subscriber);
-            this.mapper = mapper;
-        }
-
-        @Override
-        public void processNext(final T value) {
-            value(mapper.apply(value));
         }
     }
 }
