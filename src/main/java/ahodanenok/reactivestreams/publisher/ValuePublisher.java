@@ -3,9 +3,10 @@ package ahodanenok.reactivestreams.publisher;
 import java.util.Objects;
 import org.reactivestreams.Subscriber;
 
-public class ValuePublisher<T> extends AbstractPublisher<T> {
+public class ValuePublisher<T> extends AbstractPublisherV2<T> {
 
     private final T value;
+    private boolean signalled;
 
     public ValuePublisher(T value) {
         Objects.requireNonNull(value, "value");
@@ -13,6 +14,17 @@ public class ValuePublisher<T> extends AbstractPublisher<T> {
     }
 
     @Override
+    protected void onRequest(long n) {
+        if (signalled) {
+            return;
+        }
+
+        signalled = true;
+        signalNext(value);
+        signalComplete();
+    }
+
+    /*@Override
     protected void doSubscribe(Subscriber<? super T> subscriber) {
         subscriber.onSubscribe(new ValuePublisherSubscription<>(subscriber, value));
     }
@@ -34,5 +46,5 @@ public class ValuePublisher<T> extends AbstractPublisher<T> {
                 complete(value);
             }
         }
-    }
+    }*/
 }

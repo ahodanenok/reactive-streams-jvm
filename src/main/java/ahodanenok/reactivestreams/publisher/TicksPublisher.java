@@ -7,11 +7,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.reactivestreams.Subscriber;
 
-public class TicksPublisher extends AbstractPublisher<Long> {
+public class TicksPublisher extends AbstractPublisherV2<Long> {
 
     private final long count;
     private final long period;
     private final TimeUnit unit;
+
+    private ScheduledExecutorService executor;
 
     public TicksPublisher(long count, long period, TimeUnit unit) {
         if (count <= 0) {
@@ -29,6 +31,32 @@ public class TicksPublisher extends AbstractPublisher<Long> {
     }
 
     @Override
+    protected void onActivate() {
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(new TicksRunnable(), 0, period, unit);
+    }
+
+    @Override
+    protected void onDispose() {
+        executor.shutdown();
+        executor = null;
+    }
+
+    private class TicksRunnable implements Runnable {
+
+        private volatile long tick;
+
+        @Override
+        public void run() {
+            signalNext(tick);
+            tick++;
+            if (tick == count) {
+                signalComplete();
+            }
+        }
+    }
+
+    /*@Override
     protected void doSubscribe(Subscriber<? super Long> subscriber) {
         new TicksPublisherSubscription(subscriber, count, period, unit).init();
     }
@@ -68,5 +96,5 @@ public class TicksPublisher extends AbstractPublisher<Long> {
         protected void onCancel() {
             executor.shutdown();
         }
-    }
+    }*/
 }

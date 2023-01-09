@@ -1,10 +1,13 @@
 package ahodanenok.reactivestreams.publisher;
 
-import org.reactivestreams.Subscriber;
-
-public class EmptyPublisher<T> extends AbstractPublisher<T> {
+public class EmptyPublisher<T> extends AbstractPublisherV2<T> {
 
     @Override
+    protected void onActivate() {
+        signalComplete();
+    }
+
+    /*@Override
     protected void doSubscribe(Subscriber<? super T> subscriber) {
         EmptyPublisherSubscription<T> subscription = new EmptyPublisherSubscription<>(subscriber);
         subscriber.onSubscribe(subscription);
@@ -16,5 +19,5 @@ public class EmptyPublisher<T> extends AbstractPublisher<T> {
         EmptyPublisherSubscription(Subscriber<? super T> subscriber) {
             super(subscriber);
         }
-    }
+    }*/
 }
