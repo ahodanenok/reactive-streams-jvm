@@ -12,19 +12,40 @@ import ahodanenok.reactivestreams.channel.ErrorChannel;
 
 public abstract class AbstractPublisherV2<T> implements Publisher<T> {
 
+    private final Object initLock = new Object();
+
+    protected enum State {
+
+        CREATED, INIT, READY, DESTROYED;
+    }
+
     private Channel channel;
-    private volatile boolean destroyed;
+    private volatile State state = State.CREATED;
 
     protected final boolean isDestroyed() {
-        return destroyed;
+        return state == State.DESTROYED;
     }
 
     @Override
     public final void subscribe(Subscriber<? super T> subscriber) {
         Objects.requireNonNull(subscriber, "subscriber");
 
+        synchronized (initLock) {
+            if (state != State.CREATED) {
+                ErrorChannel.send(subscriber, new IllegalStateException("Publisher already has a subscriber"));
+                return;
+            }
+
+            state = State.INIT;
+            try {
+                onInit();
+            } catch (Throwable e) {
+                ErrorChannel.send(subscriber, e);
+                return;
+            }
+        }
+
         try {
-            onInit();
             channel = createChannel(subscriber);
             channel.connect(new Subscription() {
                 @Override
@@ -43,6 +64,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
         }
 
         channel.activate();
+        state = State.READY;
 
         try {
             onActivate();
@@ -52,7 +74,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
     }
 
     private void handleRequest(long n) {
-        if (destroyed) {
+        if (isDestroyed()) {
             return;
         }
 
@@ -60,7 +82,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
     }
 
     private void handleCancel() {
-        if (destroyed) {
+        if (isDestroyed()) {
             return;
         }
 
@@ -69,16 +91,17 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
     }
 
     private void handleDestroy() {
-        if (destroyed) {
+        if (isDestroyed()) {
             return;
         }
 
-        destroyed = true;
+        state = State.DESTROYED;
+        channel = null;
         onDestroy();
     }
 
     protected final void signalNext(T value) {
-        if (destroyed) {
+        if (isDestroyed()) {
             return;
         }
 
@@ -86,7 +109,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
     }
 
     protected final void signalError(Throwable error) {
-        if (destroyed) {
+        if (isDestroyed()) {
             return;
         }
 
@@ -98,7 +121,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
     }
 
     protected final void signalComplete() {
-        if (destroyed) {
+        if (isDestroyed()) {
             return;
         }
 
