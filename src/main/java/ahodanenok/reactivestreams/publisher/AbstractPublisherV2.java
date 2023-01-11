@@ -63,9 +63,14 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
             return;
         }
 
-        channel.activate();
-        state = State.READY;
+        try {
+            channel.activate();
+        } catch (Throwable e) {
+            handleDestroy();
+            throw e;
+        }
 
+        state = State.READY;
         try {
             onActivate();
         } catch (Throwable e) {
@@ -78,7 +83,11 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
             return;
         }
 
-        onRequest(n);
+        try {
+            onRequest(n);
+        } catch (Throwable e) {
+            signalError(e);
+        }
     }
 
     private void handleCancel() {
@@ -86,8 +95,12 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
             return;
         }
 
-        onDisconnect();
-        handleDestroy();
+        try {
+            onDisconnect();
+            handleDestroy();
+        } catch (Throwable e) {
+            signalError(e);
+        }
     }
 
     private void handleDestroy() {
@@ -97,7 +110,11 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
 
         state = State.DESTROYED;
         channel = null;
-        onDestroy();
+        try {
+            onDestroy();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
     protected final void signalNext(T value) {
@@ -105,7 +122,11 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
             return;
         }
 
-        channel.signalNext(value);
+        try {
+            channel.signalNext(value);
+        } catch (Throwable e) {
+            signalError(e);
+        }
     }
 
     protected final void signalError(Throwable error) {
@@ -115,6 +136,8 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
 
         try {
             channel.signalError(error);
+        } catch (Throwable e) {
+            e.printStackTrace();
         } finally {
             handleDestroy();
         }
@@ -127,6 +150,8 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
 
         try {
             channel.signalComplete();
+        } catch (Throwable e) {
+            e.printStackTrace();
         } finally {
             handleDestroy();
         }
