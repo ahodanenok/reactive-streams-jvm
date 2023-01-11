@@ -1,5 +1,7 @@
 package ahodanenok.reactivestreams.publisher;
 
+import java.util.Objects;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -19,6 +21,8 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
 
     @Override
     public final void subscribe(Subscriber<? super T> subscriber) {
+        Objects.requireNonNull(subscriber, "subscriber");
+
         try {
             onInit();
             channel = createChannel(subscriber);
