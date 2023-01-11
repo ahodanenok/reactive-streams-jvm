@@ -6,11 +6,12 @@ import org.reactivestreams.Subscription;
 
 import ahodanenok.reactivestreams.channel.Channel;
 import ahodanenok.reactivestreams.channel.SimpleChannel;
+import ahodanenok.reactivestreams.channel.ErrorChannel;
 
 public abstract class AbstractPublisherV2<T> implements Publisher<T> {
 
     private Channel channel;
-    private boolean destroyed;
+    private volatile boolean destroyed;
 
     protected final boolean isDestroyed() {
         return destroyed;
@@ -18,29 +19,47 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
 
     @Override
     public final void subscribe(Subscriber<? super T> subscriber) {
-        onInit();
+        try {
+            onInit();
+            channel = createChannel(subscriber);
+            channel.connect(new Subscription() {
+                @Override
+                public void request(long n) {
+                    handleRequest(n);
+                }
 
-        channel = createChannel(subscriber);
-        channel.connect(new Subscription() {
-            @Override
-            public void request(long n) {
-                handleRequest(n);
-            }
+                @Override
+                public void cancel() {
+                    handleCancel();
+                }
+            });
+        } catch (Throwable e) {
+            ErrorChannel.send(subscriber, e);
+            return;
+        }
 
-            @Override
-            public void cancel() {
-                handleCancel();
-            }
-        });
         channel.activate();
-        onActivate();
+
+        try {
+            onActivate();
+        } catch (Throwable e) {
+            signalError(e);
+        }
     }
 
     private void handleRequest(long n) {
+        if (destroyed) {
+            return;
+        }
+
         onRequest(n);
     }
 
     private void handleCancel() {
+        if (destroyed) {
+            return;
+        }
+
         onDisconnect();
         handleDestroy();
     }
@@ -55,17 +74,35 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
     }
 
     protected final void signalNext(T value) {
+        if (destroyed) {
+            return;
+        }
+
         channel.signalNext(value);
     }
 
     protected final void signalError(Throwable error) {
-        channel.signalError(error);
-        handleDestroy();
+        if (destroyed) {
+            return;
+        }
+
+        try {
+            channel.signalError(error);
+        } finally {
+            handleDestroy();
+        }
     }
 
     protected final void signalComplete() {
-        channel.signalComplete();
-        handleDestroy();
+        if (destroyed) {
+            return;
+        }
+
+        try {
+            channel.signalComplete();
+        } finally {
+            handleDestroy();
+        }
     }
 
     protected Channel createChannel(Subscriber<? super T> subscriber) {
