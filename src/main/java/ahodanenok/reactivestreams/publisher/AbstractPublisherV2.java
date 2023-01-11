@@ -10,9 +10,16 @@ import ahodanenok.reactivestreams.channel.SimpleChannel;
 public abstract class AbstractPublisherV2<T> implements Publisher<T> {
 
     private Channel channel;
+    private boolean destroyed;
+
+    protected final boolean isDestroyed() {
+        return destroyed;
+    }
 
     @Override
     public final void subscribe(Subscriber<? super T> subscriber) {
+        onInit();
+
         channel = createChannel(subscriber);
         channel.connect(new Subscription() {
             @Override
@@ -34,12 +41,17 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
     }
 
     private void handleCancel() {
-        onCancel();
-        handleDispose();
+        onDisconnect();
+        handleDestroy();
     }
 
-    private void handleDispose() {
-        onDispose();
+    private void handleDestroy() {
+        if (destroyed) {
+            return;
+        }
+
+        destroyed = true;
+        onDestroy();
     }
 
     protected final void signalNext(T value) {
@@ -48,16 +60,20 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
 
     protected final void signalError(Throwable error) {
         channel.signalError(error);
-        handleDispose();
+        handleDestroy();
     }
 
     protected final void signalComplete() {
         channel.signalComplete();
-        handleDispose();
+        handleDestroy();
     }
 
     protected Channel createChannel(Subscriber<? super T> subscriber) {
         return new SimpleChannel(subscriber);
+    }
+
+    protected void onInit() {
+        // no-op
     }
 
     protected void onActivate() {
@@ -68,11 +84,11 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
         // no-op
     }
 
-    protected void onCancel() {
+    protected void onDisconnect() {
         // no-op
     }
 
-    protected void onDispose() {
+    protected void onDestroy() {
         // no-op
     }
 }

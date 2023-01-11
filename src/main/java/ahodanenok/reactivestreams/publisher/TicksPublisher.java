@@ -31,13 +31,13 @@ public class TicksPublisher extends AbstractPublisherV2<Long> {
     }
 
     @Override
-    protected void onActivate() {
+    protected void onInit() {
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(new TicksRunnable(), 0, period, unit);
     }
 
     @Override
-    protected void onDispose() {
+    protected void onDestroy() {
         executor.shutdown();
         executor = null;
     }
