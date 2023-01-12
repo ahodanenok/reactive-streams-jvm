@@ -12,11 +12,11 @@ import ahodanenok.reactivestreams.channel.ErrorChannel;
 
 public abstract class AbstractPublisherV2<T> implements Publisher<T> {
 
-    private final Object initLock = new Object();
+    private final Object stateLock = new Object();
 
     protected enum State {
 
-        CREATED, INIT, READY, DESTROYED;
+        CREATED, INIT, ACTIVE, DESTROYED;
     }
 
     private Channel channel;
@@ -30,19 +30,20 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
     public final void subscribe(Subscriber<? super T> subscriber) {
         Objects.requireNonNull(subscriber, "subscriber");
 
-        synchronized (initLock) {
+        synchronized (stateLock) {
             if (state != State.CREATED) {
                 ErrorChannel.send(subscriber, new IllegalStateException("Publisher already has a subscriber"));
                 return;
             }
 
             state = State.INIT;
-            try {
-                onInit();
-            } catch (Throwable e) {
-                ErrorChannel.send(subscriber, e);
-                return;
-            }
+        }
+
+        try {
+            onInit();
+        } catch (Throwable e) {
+            ErrorChannel.send(subscriber, e);
+            return;
         }
 
         try {
@@ -70,7 +71,23 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
             throw e;
         }
 
-        state = State.READY;
+        handleActivate();
+    }
+
+    private void handleActivate() {
+        // additional check to prevent acquiring lock on each onRequest call
+        if (state != State.INIT) {
+            return;
+        }
+
+        synchronized (stateLock) {
+            if (state != State.INIT) {
+                return;
+            }
+
+            state = State.ACTIVE;
+        }
+
         try {
             onActivate();
         } catch (Throwable e) {
@@ -83,6 +100,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
             return;
         }
 
+        handleActivate();
         try {
             onRequest(n);
         } catch (Throwable e) {
