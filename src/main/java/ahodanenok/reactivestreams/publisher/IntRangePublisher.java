@@ -2,10 +2,15 @@ package ahodanenok.reactivestreams.publisher;
 
 import org.reactivestreams.Subscriber;
 
-public class IntRangePublisher extends AbstractPublisher<Integer> {
+import ahodanenok.reactivestreams.channel.Channel;
+import ahodanenok.reactivestreams.channel.SyncBatchingChannel;
+
+public class IntRangePublisher extends AbstractPublisherV2<Integer> {
 
     private final int from;
     private final int to;
+
+    private int current;
 
     public IntRangePublisher(int from, int to) {
         if (from > to) {
@@ -16,7 +21,23 @@ public class IntRangePublisher extends AbstractPublisher<Integer> {
         this.to = to;
     }
 
+    protected Channel<Integer> createChannel(Subscriber<? super Integer> subscriber) {
+        return new SyncBatchingChannel<>(subscriber);
+    }
+
     @Override
+    protected void onRequest(long n) {
+        if (current < to) {
+            signalNext(current);
+            current++;
+        }
+
+        if (current == to) {
+            signalComplete();
+        }
+    }
+
+    /*@Override
     protected void doSubscribe(Subscriber<? super Integer> subscriber) {
         IntRangePublisherSubscription subscription =
             new IntRangePublisherSubscription(subscriber, from, to);
@@ -59,5 +80,5 @@ public class IntRangePublisher extends AbstractPublisher<Integer> {
                 complete();
             }
         }
-    }
+    }*/
 }
