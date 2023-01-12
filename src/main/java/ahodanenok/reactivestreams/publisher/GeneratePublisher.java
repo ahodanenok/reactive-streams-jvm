@@ -1,14 +1,21 @@
-package ahodanenok.reactivestreams.publisher;
+    package ahodanenok.reactivestreams.publisher;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
 import org.reactivestreams.Subscriber;
 
-public class GeneratePublisher<T> extends AbstractPublisher<T> {
+import ahodanenok.reactivestreams.channel.Channel;
+import ahodanenok.reactivestreams.channel.SyncBatchingChannel;
+
+public class GeneratePublisher<T> extends AbstractPublisherV2<T> {
 
     private final T initial;
     private final BiConsumer<T, ValueCallback<T>> generator;
+
+    private T prev;
+    private boolean allowNext;
+    private ValueCallback<T> callback;
 
     public GeneratePublisher(T initial, BiConsumer<T, ValueCallback<T>> generator) {
         Objects.requireNonNull(generator, "generator");
@@ -17,6 +24,54 @@ public class GeneratePublisher<T> extends AbstractPublisher<T> {
     }
 
     @Override
+    protected Channel<T> createChannel(Subscriber<? super T> subscriber) {
+        return new SyncBatchingChannel<>(subscriber);
+    }
+
+    @Override
+    protected void onActivate() {
+        prev = initial;
+        callback = new ValueCallback<T>() {
+
+            @Override
+            public void signalValue(T value) {
+                if (isDestroyed()) {
+                    return;
+                }
+
+                if (!allowNext) {
+                    GeneratePublisher.this.signalError(new IllegalStateException("Multiple resolve calls aren't allowed"));
+                    return;
+                }
+
+                allowNext = false;
+                prev = value;
+                GeneratePublisher.this.signalNext(value);
+            }
+
+            @Override
+            public void signalError(Throwable error) {
+                GeneratePublisher.this.signalError(error);
+            }
+
+            @Override
+            public void signalComplete() {
+                GeneratePublisher.this.signalComplete();
+            }
+        };
+    }
+
+    @Override
+    protected void onRequest(long n) {
+        allowNext = true;
+        try {
+            generator.accept(prev, callback);
+        } catch (Throwable e) {
+            signalError(e);
+        }
+    }
+
+    /*@Override
     protected void doSubscribe(Subscriber<? super T> subscriber) {
         subscriber.onSubscribe(new GeneratePublisherSubscription<>(subscriber, initial, generator));
     }
@@ -71,5 +126,5 @@ public class GeneratePublisher<T> extends AbstractPublisher<T> {
                 error(e);
             }
         }
-    }
+    }*/
 }

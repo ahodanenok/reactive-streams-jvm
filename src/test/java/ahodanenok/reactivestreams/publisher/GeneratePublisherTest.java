@@ -15,7 +15,7 @@ public class GeneratePublisherTest {
     public void shouldCompleteWithoutAnyValues() throws Exception {
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        GeneratePublisher<Integer> publisher = new GeneratePublisher<>(10, (prev, callback) -> callback.complete());
+        GeneratePublisher<Integer> publisher = new GeneratePublisher<>(10, (prev, callback) -> callback.signalComplete());
         publisher.subscribe(subscriber);
         subscriber.expectCompletion();
         subscriber.expectNone();
@@ -27,9 +27,9 @@ public class GeneratePublisherTest {
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
         GeneratePublisher<Integer> publisher = new GeneratePublisher<>(2, (prev, callback) -> {
             if (prev < 5) {
-                callback.resolve(prev + 1);
+                callback.signalValue(prev + 1);
             } else {
-                callback.complete();
+                callback.signalComplete();
             }
         });
         publisher.subscribe(subscriber);
@@ -48,9 +48,9 @@ public class GeneratePublisherTest {
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
         GeneratePublisher<Integer> publisher = new GeneratePublisher<>(0, (prev, callback) -> {
             if (prev < 5) {
-                callback.resolve(prev + 1);
+                callback.signalValue(prev + 1);
             } else {
-                callback.complete();
+                callback.signalComplete();
             }
         });
         publisher.subscribe(subscriber);
@@ -68,7 +68,7 @@ public class GeneratePublisherTest {
     public void shouldNotSendMoreThanRequested() throws Exception {
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        GeneratePublisher<Integer> publisher = new GeneratePublisher<Integer>(7, (prev, callback) -> callback.resolve(prev + 1));
+        GeneratePublisher<Integer> publisher = new GeneratePublisher<Integer>(7, (prev, callback) -> callback.signalValue(prev + 1));
         publisher.subscribe(subscriber);
         subscriber.request(2);
         subscriber.expectNext(7);
@@ -91,8 +91,8 @@ public class GeneratePublisherTest {
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
         GeneratePublisher<Integer> publisher = new GeneratePublisher<Integer>(0, (prev, callback) -> {
-            callback.resolve(100);
-            callback.resolve(200);
+            callback.signalValue(100);
+            callback.signalValue(200);
         });
         publisher.subscribe(subscriber);
         subscriber.request(20);
@@ -106,9 +106,9 @@ public class GeneratePublisherTest {
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
         GeneratePublisher<Integer> publisher = new GeneratePublisher<Integer>(1, (prev, callback) -> {
             if (prev == 1) {
-                callback.resolve(100);
+                callback.signalValue(100);
             } else {
-                callback.error(new ClassCastException());
+                callback.signalError(new ClassCastException());
             }
         });
         publisher.subscribe(subscriber);
@@ -125,7 +125,7 @@ public class GeneratePublisherTest {
 
     @Test
     public void shouldThrowNpeIfSubscriberNull() {
-        GeneratePublisher<Integer> publisher = new GeneratePublisher<>(1, (prev, callback) -> callback.resolve(prev + 1));
+        GeneratePublisher<Integer> publisher = new GeneratePublisher<>(1, (prev, callback) -> callback.signalValue(prev + 1));
         assertThrows(NullPointerException.class, () -> publisher.subscribe(null));
     }
 
@@ -134,7 +134,7 @@ public class GeneratePublisherTest {
     public void shouldThrowIllegalArgumentIfRequestedAmountNotValid(long count) throws Exception {
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        GeneratePublisher<Integer> publisher = new GeneratePublisher<>(1, (prev, callback) -> callback.resolve(prev + 1));
+        GeneratePublisher<Integer> publisher = new GeneratePublisher<>(1, (prev, callback) -> callback.signalValue(prev + 1));
         publisher.subscribe(subscriber);
         subscriber.request(count);
         subscriber.expectError(IllegalArgumentException.class);

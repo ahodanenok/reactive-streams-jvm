@@ -5,9 +5,9 @@ import org.reactivestreams.Subscriber;
 
 public interface ValueCallback<T> {
 
-    void resolve(T value);
+    void signalValue(T value);
 
-    void error(Throwable error);
+    void signalError(Throwable error);
 
-    void complete();
+    void signalComplete();
 }

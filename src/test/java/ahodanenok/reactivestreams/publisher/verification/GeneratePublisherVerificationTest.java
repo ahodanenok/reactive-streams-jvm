@@ -16,9 +16,9 @@ public class GeneratePublisherVerificationTest extends PublisherVerification<Int
     public Publisher<Integer> createPublisher(long elements) {
         return new GeneratePublisher<>(0, (prev, callback) -> {
             if (prev < elements) {
-                callback.resolve(prev + 1);
+                callback.signalValue(prev + 1);
             } else {
-                callback.complete();
+                callback.signalComplete();
             }
         });
     }
@@ -26,10 +26,6 @@ public class GeneratePublisherVerificationTest extends PublisherVerification<Int
     @Override
     public Publisher<Integer> createFailedPublisher() {
         return null;
-    }
-
-    @Override public long maxElementsFromPublisher() {
-        return 1;
     }
 
     @Override
