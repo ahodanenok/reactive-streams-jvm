@@ -5,9 +5,13 @@ import java.util.concurrent.CompletionStage;
 
 import org.reactivestreams.Subscriber;
 
-public class CompletionStagePublisher<T> extends AbstractPublisher<T> {
+public class CompletionStagePublisher<T> extends AbstractPublisherV2<T> {
 
     private final CompletionStage<T> stage;
+
+    private volatile T result;
+    private volatile boolean resultReady;
+    private volatile boolean requested;
 
     public CompletionStagePublisher(CompletionStage<T> stage) {
         Objects.requireNonNull(stage, "stage");
@@ -15,6 +19,36 @@ public class CompletionStagePublisher<T> extends AbstractPublisher<T> {
     }
 
     @Override
+    protected void onActivate() {
+        stage.whenComplete((value, error) -> {
+            if (error != null) {
+                signalError(error);
+                return;
+            }
+
+            result = value;
+            resultReady = true;
+            if (requested) {
+                signalNext(result);
+                signalComplete();
+            }
+        });
+    }
+
+    @Override
+    protected void onRequest(long n) {
+        if (requested) {
+            return;
+        }
+
+        requested = true;
+        if (resultReady) {
+            signalNext(result);
+            signalComplete();
+        }
+    }
+
+    /*@Override
     protected void doSubscribe(Subscriber<? super T> subscriber) {
         new CompletionStagePublisherSubscription<>(subscriber, stage).init();
     }
@@ -51,5 +85,5 @@ public class CompletionStagePublisher<T> extends AbstractPublisher<T> {
                 }
             });
         }
-    }
+    }*/
 }
