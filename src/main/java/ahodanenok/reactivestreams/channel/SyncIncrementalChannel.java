@@ -11,6 +11,7 @@ public class SyncIncrementalChannel<T> implements Channel<T> {
 
     private Subscription upstream;
     private Subscriber<? super T> downstream;
+    private final long batchSize;
 
     private volatile boolean requesting;
     private volatile boolean cancelled;
@@ -18,13 +19,22 @@ public class SyncIncrementalChannel<T> implements Channel<T> {
     private volatile long signalledCount;
 
     public SyncIncrementalChannel(Subscriber<? super T> downstream) {
+        this(downstream, 1);
+    }
+
+    public SyncIncrementalChannel(Subscriber<? super T> downstream, long batchSize) {
         this.downstream = downstream;
+        this.batchSize = batchSize;
     }
 
     @Override
     public void connect(Subscription upstream) {
         this.upstream = upstream;
-        handleRequest();
+        if (cancelled) {
+            upstream.cancel();
+        } else {
+            handleRequest();
+        }
     }
 
     @Override
@@ -36,7 +46,7 @@ public class SyncIncrementalChannel<T> implements Channel<T> {
     public void request(long n) {
         if (n <= 0) {
             signalError(new IllegalArgumentException("Requested amount must be positive: " + n));
-            upstream.cancel();
+            if (upstream != null) upstream.cancel();
             return;
         }
 
@@ -60,8 +70,12 @@ public class SyncIncrementalChannel<T> implements Channel<T> {
                     break;
                 }
 
-                // here some signal* must be called
-                upstream.request(1);
+                // here some signal* must be called synchroniously
+                if (batchSize == -1) {
+                    upstream.request(requestedCount - signalledCount);
+                } else {
+                    upstream.request(Math.min(requestedCount - signalledCount, batchSize));
+                }
             }
         } finally {
             requesting = false;
