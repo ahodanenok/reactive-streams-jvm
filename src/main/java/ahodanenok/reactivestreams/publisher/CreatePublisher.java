@@ -6,9 +6,17 @@ import java.util.function.LongConsumer;
 
 import org.reactivestreams.Subscriber;
 
-public class CreatePublisher<T> extends AbstractPublisher<T> {
+import ahodanenok.reactivestreams.channel.Channel;
+import ahodanenok.reactivestreams.channel.AsyncIncrementalChannel;
+
+public class CreatePublisher<T> extends AbstractPublisherV2<T> {
 
     private final Consumer<FlowCallback<T>> consumer;
+
+    private FlowCallback<T> callback;
+    private volatile long pendingRequested;
+    private volatile LongConsumer onRequestAction;
+    private volatile Action onCancelAction;
 
     public CreatePublisher(Consumer<FlowCallback<T>> consumer) {
         Objects.requireNonNull(consumer, "consumer");
@@ -16,6 +24,71 @@ public class CreatePublisher<T> extends AbstractPublisher<T> {
     }
 
     @Override
+    protected Channel<T> createChannel(Subscriber<? super T> subscriber) {
+        return new AsyncIncrementalChannel<>(subscriber, -1);
+    }
+
+    @Override
+    protected void onActivate() {
+        consumer.accept(new FlowCallback<>() {
+
+            @Override
+            public void setOnCancel(Action action) {
+                onCancelAction = action;
+                if (isDestroyed()) {
+                    onCancelAction.execute();
+                }
+            }
+
+            @Override
+            public void setOnRequest(LongConsumer action) {
+                onRequestAction = action;
+                if (pendingRequested > 0) {
+                    long n = pendingRequested;
+                    pendingRequested = 0;
+                    onRequestAction.accept(n);
+                }
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return isDestroyed();
+            }
+
+            @Override
+            public void signalNext(T value) {
+                CreatePublisher.this.signalNext(value);
+            }
+
+            @Override
+            public void signalError(Throwable error) {
+                CreatePublisher.this.signalError(error);
+            }
+
+            @Override
+            public void signalComplete() {
+                CreatePublisher.this.signalComplete();
+            }
+        });
+    }
+
+    @Override
+    protected void onRequest(long n) {
+        if (onRequestAction != null) {
+            onRequestAction.accept(n);
+        } else {
+            pendingRequested = Utils.addRequested(pendingRequested, n);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (onCancelAction != null) {
+            onCancelAction.execute();
+        }
+    }
+
+    /*@Override
     protected void doSubscribe(Subscriber<? super T> subscriber) {
         CreatePublisherSubscription<T> subscription = new CreatePublisherSubscription<>(subscriber);
         subscription.init();
@@ -83,5 +156,5 @@ public class CreatePublisher<T> extends AbstractPublisher<T> {
                 }
             }
         }
-    }
+    }*/
 }

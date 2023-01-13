@@ -1,5 +1,6 @@
 package ahodanenok.reactivestreams.publisher;
 
+import java.util.LinkedList;
 import java.util.concurrent.ForkJoinPool;
 
 import org.reactivestreams.tck.TestEnvironment;
@@ -17,7 +18,7 @@ public class CreatePublisherTest {
     public void shouldCompleteWithoutAnyValues() throws Exception {
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        CreatePublisher<Integer> publisher = new CreatePublisher<>(f -> f.complete());
+        CreatePublisher<Integer> publisher = new CreatePublisher<>(f -> f.signalComplete());
         publisher.subscribe(subscriber);
         subscriber.expectCompletion();
         subscriber.expectNone();
@@ -25,6 +26,12 @@ public class CreatePublisherTest {
 
     @Test
     public void shouldRequestPending() throws Exception {
+        LinkedList<Integer> items = new LinkedList<>();
+        items.add(0);
+        items.add(1);
+        items.add(2);
+        items.add(3);
+
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
         CreatePublisher<Integer> publisher = new CreatePublisher<>(f -> {
@@ -32,11 +39,13 @@ public class CreatePublisherTest {
                 try {
                     Thread.currentThread().sleep(20);
                     f.setOnRequest(n -> {
-                        for (int i = 0; i < n; i++) {
-                            f.value(i);
+                        for (int i = 0; i < n && !items.isEmpty(); i++) {
+                            f.signalNext(items.poll());
                         }
 
-                        f.complete();
+                        if (items.isEmpty()) {
+                            f.signalComplete();
+                        }
                     });
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -51,6 +60,7 @@ public class CreatePublisherTest {
         subscriber.expectNext(3);
         subscriber.expectCompletion();
         subscriber.expectNone();
+        assertEquals(0, items.size());
     }
 
     @Test
@@ -63,7 +73,7 @@ public class CreatePublisherTest {
                 try {
                     Thread.currentThread().sleep(20);
                     f.setOnRequest(n -> {
-                        f.value(100);
+                        f.signalNext(100);
                     });
                     f.setOnCancel(() -> onCancelCalled[0] = true);
                 } catch (InterruptedException e) {
@@ -80,15 +90,22 @@ public class CreatePublisherTest {
 
     @Test
     public void shouldNotSendValueAfterCompletion() throws Exception {
+        LinkedList<Integer> items = new LinkedList<>();
+        items.add(2);
+        items.add(3);
+        items.add(4);
+
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
         CreatePublisher<Integer> publisher = new CreatePublisher<>(f -> {
             f.setOnRequest(n -> {
-                for (int i = 2; i < 2 + n; i++) {
-                    f.value(i);
+                for (int i = 0; i < n && !items.isEmpty(); i++) {
+                    f.signalNext(items.poll());
                 }
 
-                f.complete();
+                if (items.isEmpty()) {
+                    f.signalComplete();
+                }
             });
         });
         publisher.subscribe(subscriber);
@@ -99,6 +116,7 @@ public class CreatePublisherTest {
         subscriber.expectCompletion();
         subscriber.request(1);
         subscriber.expectNone();
+        assertEquals(0, items.size());
     }
 
     @Test
@@ -108,10 +126,10 @@ public class CreatePublisherTest {
         CreatePublisher<Integer> publisher = new CreatePublisher<>(f -> {
             f.setOnRequest(n -> {
                 for (int i = 0; i < 5; i++) {
-                    f.value(i);
+                    f.signalNext(i);
                 }
 
-                f.complete();
+                f.signalComplete();
             });
         });
         publisher.subscribe(subscriber);
@@ -132,7 +150,7 @@ public class CreatePublisherTest {
         CreatePublisher<Integer> publisher = new CreatePublisher<>(f -> {
             f.setOnRequest(n -> {
                 for (int i = 0; i < n; i++) {
-                    f.value(i);
+                    f.signalNext(i);
                 }
             });
         });
@@ -159,7 +177,7 @@ public class CreatePublisherTest {
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
         CreatePublisher<Integer> publisher = new CreatePublisher<>(f -> {
             f.setOnRequest(n -> {
-                f.value(100);
+                f.signalNext(100);
                 throw new ClassCastException();
             });
         });
@@ -177,7 +195,7 @@ public class CreatePublisherTest {
 
     @Test
     public void shouldThrowNpeIfSubscriberNull() {
-        CreatePublisher<Integer> publisher = new CreatePublisher<>(f -> f.complete());
+        CreatePublisher<Integer> publisher = new CreatePublisher<>(f -> f.signalComplete());
         assertThrows(NullPointerException.class, () -> publisher.subscribe(null));
     }
 

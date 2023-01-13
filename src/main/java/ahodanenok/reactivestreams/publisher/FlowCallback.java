@@ -8,13 +8,11 @@ public interface FlowCallback<T> {
 
     void setOnCancel(Action action);
 
-    void value(T value);
-
-    void complete(T value);
-
-    void complete();
-
-    void error(Throwable e);
-
     boolean isCancelled();
+
+    void signalNext(T value);
+
+    void signalComplete();
+
+    void signalError(Throwable e);
 }
