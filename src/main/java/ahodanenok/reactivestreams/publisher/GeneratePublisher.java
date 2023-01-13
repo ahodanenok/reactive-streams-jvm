@@ -6,7 +6,7 @@ import java.util.function.BiConsumer;
 import org.reactivestreams.Subscriber;
 
 import ahodanenok.reactivestreams.channel.Channel;
-import ahodanenok.reactivestreams.channel.SyncBatchingChannel;
+import ahodanenok.reactivestreams.channel.SyncIncrementalChannel;
 
 public class GeneratePublisher<T> extends AbstractPublisherV2<T> {
 
@@ -25,7 +25,7 @@ public class GeneratePublisher<T> extends AbstractPublisherV2<T> {
 
     @Override
     protected Channel<T> createChannel(Subscriber<? super T> subscriber) {
-        return new SyncBatchingChannel<>(subscriber);
+        return new SyncIncrementalChannel<>(subscriber);
     }
 
     @Override

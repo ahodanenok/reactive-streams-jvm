@@ -7,24 +7,18 @@ import org.reactivestreams.Subscription;
  * Requests for the next items in batches of the configured size.
  * For the cases where the next items are sent on the same thread as requested.
  */
-public class SyncBatchingChannel<T> implements Channel<T> {
+public class SyncIncrementalChannel<T> implements Channel<T> {
 
     private Subscription upstream;
     private Subscriber<? super T> downstream;
-    private final long batchSize;
 
     private volatile boolean requesting;
     private volatile boolean cancelled;
     private volatile long requestedCount;
     private volatile long signalledCount;
 
-    public SyncBatchingChannel(Subscriber<? super T> downstream) {
-        this(downstream, 1);
-    }
-
-    public SyncBatchingChannel(Subscriber<? super T> downstream, long batchSize) {
+    public SyncIncrementalChannel(Subscriber<? super T> downstream) {
         this.downstream = downstream;
-        this.batchSize = batchSize;
     }
 
     @Override
@@ -67,7 +61,7 @@ public class SyncBatchingChannel<T> implements Channel<T> {
                 }
 
                 // here some signal* must be called
-                upstream.request(batchSize);
+                upstream.request(1);
             }
         } finally {
             requesting = false;

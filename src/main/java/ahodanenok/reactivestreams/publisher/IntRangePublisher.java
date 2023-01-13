@@ -3,7 +3,7 @@ package ahodanenok.reactivestreams.publisher;
 import org.reactivestreams.Subscriber;
 
 import ahodanenok.reactivestreams.channel.Channel;
-import ahodanenok.reactivestreams.channel.SyncBatchingChannel;
+import ahodanenok.reactivestreams.channel.SyncIncrementalChannel;
 
 public class IntRangePublisher extends AbstractPublisherV2<Integer> {
 
@@ -22,7 +22,7 @@ public class IntRangePublisher extends AbstractPublisherV2<Integer> {
     }
 
     protected Channel<Integer> createChannel(Subscriber<? super Integer> subscriber) {
-        return new SyncBatchingChannel<>(subscriber);
+        return new SyncIncrementalChannel<>(subscriber);
     }
 
     @Override
