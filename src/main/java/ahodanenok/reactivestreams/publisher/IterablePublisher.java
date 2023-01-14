@@ -5,16 +5,38 @@ import java.util.Iterator;
 
 import org.reactivestreams.Subscriber;
 
-public class IterablePublisher<T> extends AbstractPublisher<T> {
+import ahodanenok.reactivestreams.channel.Channel;
+import ahodanenok.reactivestreams.channel.SyncIncrementalChannel;
+
+public class IterablePublisher<T> extends AbstractPublisherV2<T> {
 
     private final Iterable<T> iterable;
+
+    private volatile Iterator<T> iterator;
 
     public IterablePublisher(Iterable<T> iterable) {
         Objects.requireNonNull(iterable, "iterable");
         this.iterable = iterable;
     }
 
+    protected Channel<T> createChannel(Subscriber<? super T> subscriber) {
+        return new SyncIncrementalChannel<>(subscriber);
+    }
+
     @Override
+    protected void onRequest(long n) {
+        if (iterator == null) {
+            iterator = iterable.iterator();
+        }
+
+        if (iterator.hasNext()) {
+            signalNext(iterator.next());
+        } else {
+            signalComplete();
+        }
+    }
+
+    /*@Override
     protected void doSubscribe(Subscriber<? super T> subscriber) {
         subscriber.onSubscribe(new IterablePublisherSubscription<>(subscriber, iterable));
     }
@@ -53,5 +75,5 @@ public class IterablePublisher<T> extends AbstractPublisher<T> {
                 complete();
             }
         }
-    }
+    }*/
 }
