@@ -42,6 +42,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
         try {
             onInit();
         } catch (Throwable e) {
+            e.printStackTrace();
             ErrorChannel.send(subscriber, e);
             return;
         }
@@ -60,6 +61,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
                 }
             });
         } catch (Throwable e) {
+            e.printStackTrace();
             ErrorChannel.send(subscriber, e);
             return;
         }
@@ -67,6 +69,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
         try {
             channel.activate();
         } catch (Throwable e) {
+            e.printStackTrace();
             handleDestroy();
             throw e;
         }
@@ -91,6 +94,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
         try {
             onActivate();
         } catch (Throwable e) {
+            e.printStackTrace();
             signalError(e);
         }
     }
@@ -104,6 +108,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
         try {
             onRequest(n);
         } catch (Throwable e) {
+            e.printStackTrace();
             signalError(e);
         }
     }
@@ -117,6 +122,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
             onDisconnect();
             handleDestroy();
         } catch (Throwable e) {
+            e.printStackTrace();
             signalError(e);
         }
     }
@@ -143,6 +149,7 @@ public abstract class AbstractPublisherV2<T> implements Publisher<T> {
         try {
             channel.signalNext(value);
         } catch (Throwable e) {
+            e.printStackTrace();
             signalError(e);
         }
     }
