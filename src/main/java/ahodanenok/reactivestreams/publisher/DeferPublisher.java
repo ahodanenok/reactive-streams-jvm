@@ -6,7 +6,9 @@ import java.util.function.Supplier;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
-public class DeferPublisher<T> extends AbstractPublisher<T> {
+import ahodanenok.reactivestreams.channel.ErrorChannel;
+
+public class DeferPublisher<T> implements Publisher<T> {
 
     private final Supplier<? extends Publisher<T>> supplier;
 
@@ -16,21 +18,14 @@ public class DeferPublisher<T> extends AbstractPublisher<T> {
     }
 
     @Override
-    protected void doSubscribe(Subscriber<? super T> subscriber) {
+    public void subscribe(Subscriber<? super T> subscriber) {
+        Objects.requireNonNull(subscriber, "subscriber");
+
         Publisher<T> publisher = supplier.get();
         if (publisher != null) {
             publisher.subscribe(subscriber);
         } else {
-            DeferPublisherSubscription<T> subscription = new DeferPublisherSubscription<>(subscriber);
-            subscriber.onSubscribe(subscription);
-            subscription.error(new NullPointerException("Supplied publisher is null"));
-        }
-    }
-
-    static class DeferPublisherSubscription<T> extends AbstractSubscription<T> {
-
-        DeferPublisherSubscription(Subscriber<? super T> subscriber) {
-            super(subscriber);
+            ErrorChannel.send(subscriber, new NullPointerException("Supplied publisher is null"));
         }
     }
 }

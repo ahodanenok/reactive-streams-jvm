@@ -1,31 +1,28 @@
 package ahodanenok.reactivestreams.publisher.verification;
 
+import java.util.stream.LongStream;
+
 import org.reactivestreams.*;
 import org.reactivestreams.tck.*;
 
 import ahodanenok.reactivestreams.publisher.DeferPublisher;
-import ahodanenok.reactivestreams.publisher.ValuePublisher;
+import ahodanenok.reactivestreams.publisher.IterablePublisher;
 import ahodanenok.reactivestreams.publisher.ErrorPublisher;
 
-public class DeferPublisherVerificationTest extends PublisherVerification<Integer> {
+public class DeferPublisherVerificationTest extends PublisherVerification<Long> {
 
     public DeferPublisherVerificationTest() {
         super(new TestEnvironment());
     }
 
     @Override
-    public Publisher<Integer> createPublisher(long elements) {
-        return new DeferPublisher<>(() -> new ValuePublisher(5));
+    public Publisher<Long> createPublisher(long elements) {
+        return new DeferPublisher<>(() -> new IterablePublisher(() -> LongStream.range(0, elements).iterator()));
     }
 
     @Override
-    public Publisher<Integer> createFailedPublisher() {
+    public Publisher<Long> createFailedPublisher() {
         return new DeferPublisher<>(() -> new ErrorPublisher(new RuntimeException("test")));
-    }
-
-    @Override
-    public long maxElementsFromPublisher() {
-        return 1;
     }
 
     @Override
