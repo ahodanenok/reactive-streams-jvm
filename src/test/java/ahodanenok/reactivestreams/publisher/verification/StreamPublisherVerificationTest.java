@@ -1,6 +1,6 @@
 package ahodanenok.reactivestreams.publisher.verification;
 
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
@@ -8,19 +8,19 @@ import org.reactivestreams.tck.TestEnvironment;
 
 import ahodanenok.reactivestreams.publisher.StreamPublisher;
 
-public class StreamPublisherVerificationTest extends PublisherVerification<Integer> {
+public class StreamPublisherVerificationTest extends PublisherVerification<Long> {
 
     public StreamPublisherVerificationTest() {
         super(new TestEnvironment());
     }
 
     @Override
-    public Publisher<Integer> createPublisher(long elements) {
-        return new StreamPublisher<>(IntStream.range(0, (int) elements).boxed());
+    public Publisher<Long> createPublisher(long elements) {
+        return new StreamPublisher<>(LongStream.range(0, elements).boxed());
     }
 
     @Override
-    public Publisher<Integer> createFailedPublisher() {
+    public Publisher<Long> createFailedPublisher() {
         return null;
     }
 

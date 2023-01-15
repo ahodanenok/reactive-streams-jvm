@@ -6,9 +6,14 @@ import java.util.stream.Stream;
 
 import org.reactivestreams.Subscriber;
 
-public class StreamPublisher<T> extends AbstractPublisher<T> {
+import ahodanenok.reactivestreams.channel.Channel;
+import ahodanenok.reactivestreams.channel.SyncIncrementalChannel;
+
+public class StreamPublisher<T> extends AbstractPublisherV2<T> {
 
     private final Stream<T> stream;
+
+    private volatile Iterator<T> iterator;
 
     public StreamPublisher(Stream<T> stream) {
         Objects.requireNonNull(stream, "stream");
@@ -16,6 +21,25 @@ public class StreamPublisher<T> extends AbstractPublisher<T> {
     }
 
     @Override
+    protected Channel<T> createChannel(Subscriber<? super T> subscriber) {
+        return new SyncIncrementalChannel(subscriber);
+    }
+
+    @Override
+    protected void onRequest(long n) {
+        if (iterator == null) {
+            iterator = stream.iterator();
+        }
+
+        if (iterator.hasNext()) {
+            signalNext(iterator.next());
+        } else {
+            signalComplete();
+            stream.close();
+        }
+    }
+
+    /*@Override
     protected void doSubscribe(Subscriber<? super T> subscriber) {
         subscriber.onSubscribe(new StreamPublisherSubscription<>(subscriber, stream));
     }
@@ -61,5 +85,5 @@ public class StreamPublisher<T> extends AbstractPublisher<T> {
                 error(e);
             }
         }
-    }
+    }*/
 }
