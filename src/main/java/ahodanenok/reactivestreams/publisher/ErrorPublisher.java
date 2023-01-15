@@ -3,7 +3,7 @@ package ahodanenok.reactivestreams.publisher;
 import java.util.Objects;
 import org.reactivestreams.Subscriber;
 
-public class ErrorPublisher<T> extends AbstractPublisher<T> {
+public class ErrorPublisher<T> extends AbstractPublisherV2<T> {
 
     private final Throwable error;
 
@@ -13,6 +13,11 @@ public class ErrorPublisher<T> extends AbstractPublisher<T> {
     }
 
     @Override
+    protected void onActivate() {
+        signalError(error);
+    }
+
+    /*@Override
     protected void doSubscribe(Subscriber<? super T> subscriber) {
         ErrorPublisherSubscription<T> subscription = new ErrorPublisherSubscription<>(subscriber);
         subscriber.onSubscribe(subscription);
@@ -24,5 +29,5 @@ public class ErrorPublisher<T> extends AbstractPublisher<T> {
         ErrorPublisherSubscription(Subscriber<? super T> subscriber) {
             super(subscriber);
         }
-    }
+    }*/
 }
