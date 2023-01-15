@@ -31,7 +31,7 @@ public class TicksPublisher extends AbstractPublisherV2<Long> {
     }
 
     @Override
-    protected void onInit() {
+    protected void onActivate() {
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(new TicksRunnable(), 0, period, unit);
     }
