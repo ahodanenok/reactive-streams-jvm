@@ -45,14 +45,14 @@ public class LongRangePublisher implements Publisher<Long> {
                     break;
                 }
 
-                subscriber.onNext(next);
+                downstream.onNext(next);
                 next++;
                 n--;
             }
 
             current = next;
             if (next == to && !cancelled) {
-                subscriber.onComplete();
+                downstream.onComplete();
             }
 
             return next < to;

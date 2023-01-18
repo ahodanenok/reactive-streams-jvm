@@ -7,7 +7,7 @@ import org.reactivestreams.Subscription;
 
 public abstract class SyncPublisherSubscription<T> implements Subscription {
 
-    protected final Subscriber<? super T> subscriber;
+    protected final Subscriber<? super T> downstream;
     protected final AtomicLong requested = new AtomicLong(0);
     protected volatile boolean cancelled;
 
@@ -16,14 +16,14 @@ public abstract class SyncPublisherSubscription<T> implements Subscription {
             throw new NullPointerException("subscriber is null");
         }
 
-        this.subscriber = subscriber;
+        this.downstream = subscriber;
     }
 
     @Override
     public void request(long n) {
         if (n <= 0) {
             cancel();
-            subscriber.onError(new IllegalArgumentException("requested amount must be > 0: " + n));
+            downstream.onError(new IllegalArgumentException("requested amount must be > 0: " + n));
             return;
         }
 

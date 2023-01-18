@@ -1,4 +1,4 @@
-package ahodanenok.reactivestreams.publisher.verification;
+package ahodanenok.reactivestreams.verification;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
