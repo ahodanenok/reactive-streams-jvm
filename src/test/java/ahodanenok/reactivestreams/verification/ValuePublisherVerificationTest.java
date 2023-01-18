@@ -4,7 +4,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
 
-import ahodanenok.reactivestreams.publisher.ValuePublisher;
+import ahodanenok.reactivestreams.ValuePublisher;
 
 public class ValuePublisherVerificationTest extends PublisherVerification<Integer> {
 
