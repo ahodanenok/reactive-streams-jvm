@@ -1,4 +1,4 @@
-package ahodanenok.reactivestreams.publisher;
+package ahodanenok.reactivestreams;
 
 import org.reactivestreams.tck.TestEnvironment;
 import org.reactivestreams.tck.TestEnvironment.ManualSubscriberWithSubscriptionSupport;
