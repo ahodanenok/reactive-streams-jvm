@@ -53,6 +53,7 @@ public abstract class SyncPublisherSubscription<T> implements Subscription {
         requestedCurrent = requested.get();
         while (!cancelled) {
             if (!handleRequest(requestedCurrent)) {
+                cancel();
                 break;
             }
 
