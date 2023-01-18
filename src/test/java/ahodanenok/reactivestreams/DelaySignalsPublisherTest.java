@@ -1,4 +1,4 @@
-package ahodanenok.reactivestreams.processor;
+package ahodanenok.reactivestreams;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -15,14 +15,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import ahodanenok.reactivestreams.*;
 import ahodanenok.reactivestreams.publisher.*;
 
-public class DelayProcessorTest {
+public class DelaySignalsPublisherTest {
 
     @Test
     public void shouldDelayEmptyPublisher() throws Exception {
         ManualSubscriberWithSubscriptionSupport<String> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        DelayProcessor<String> processor = new DelayProcessor<>(50, TimeUnit.MILLISECONDS);
-        new EmptyPublisher<String>().subscribe(processor);
+        DelaySignalsPublisher<String> processor =
+            new DelaySignalsPublisher<>(new EmptyPublisher<>(), 50, TimeUnit.MILLISECONDS);
         processor.subscribe(subscriber);
         subscriber.expectNone(49);
         subscriber.expectCompletion();
@@ -33,8 +33,8 @@ public class DelayProcessorTest {
     public void shouldDelaySingleValue() throws Exception {
         ManualSubscriberWithSubscriptionSupport<String> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        DelayProcessor<String> processor = new DelayProcessor<>(25, TimeUnit.MILLISECONDS);
-        new ValuePublisher<>("test").subscribe(processor);
+        DelaySignalsPublisher<String> processor =
+            new DelaySignalsPublisher<>(new ValuePublisher<>("test"), 25, TimeUnit.MILLISECONDS);
         processor.subscribe(subscriber);
         subscriber.request(1);
         subscriber.expectNone(24);
@@ -47,8 +47,8 @@ public class DelayProcessorTest {
     public void shouldDelayMultipleValues() throws Exception {
         ManualSubscriberWithSubscriptionSupport<String> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        DelayProcessor<String> processor = new DelayProcessor<>(30, TimeUnit.MILLISECONDS);
-        new IterablePublisher<>(List.of("a", "b", "c")).subscribe(processor);
+        DelaySignalsPublisher<String> processor =
+            new DelaySignalsPublisher<>(new IterablePublisher<>(List.of("a", "b", "c")), 30, TimeUnit.MILLISECONDS);
         processor.subscribe(subscriber);
         subscriber.request(5);
         subscriber.expectNone(29);
@@ -63,8 +63,8 @@ public class DelayProcessorTest {
     public void shouldDelayError() throws Exception {
         ManualSubscriberWithSubscriptionSupport<String> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        DelayProcessor<String> processor = new DelayProcessor<>(35, TimeUnit.MILLISECONDS);
-        new ErrorPublisher<String>(new RuntimeException("error!")).subscribe(processor);
+        DelaySignalsPublisher<String> processor =
+            new DelaySignalsPublisher<>(new ErrorPublisher<String>(new RuntimeException("error!")), 35, TimeUnit.MILLISECONDS);
         processor.subscribe(subscriber);
         subscriber.expectNone(34);
         subscriber.expectError(RuntimeException.class);
@@ -73,19 +73,22 @@ public class DelayProcessorTest {
 
     @Test
     public void shouldThrowNpeIfNullUnit() {
-        assertThrows(NullPointerException.class, () -> new DelayProcessor<>(10, null));
+        assertThrows(NullPointerException.class,
+            () -> new DelaySignalsPublisher<>(new NeverPublisher<>(), 10, null));
     }
 
     @Test
     public void shouldThrowIllegalArgumentIfDelayInvalid() {
-        assertThrows(IllegalArgumentException.class, () -> new DelayProcessor<>(0, TimeUnit.MILLISECONDS));
-        assertThrows(IllegalArgumentException.class, () -> new DelayProcessor<>(-10, TimeUnit.MILLISECONDS));
+        assertThrows(IllegalArgumentException.class,
+            () -> new DelaySignalsPublisher<>(new NeverPublisher<>(), 0, TimeUnit.MILLISECONDS));
+        assertThrows(IllegalArgumentException.class,
+            () -> new DelaySignalsPublisher<>(new NeverPublisher<>(), -10, TimeUnit.MILLISECONDS));
     }
 
     @Test
     public void shouldThrowNpeIfSubscriberNull() {
-        DelayProcessor<Integer> processor = new DelayProcessor<>(1, TimeUnit.MILLISECONDS);
-        assertThrows(NullPointerException.class, () -> processor.subscribe(null));
+        DelaySignalsPublisher<Integer> publisher = new DelaySignalsPublisher<>(new NeverPublisher<>(), 1, TimeUnit.MILLISECONDS);
+        assertThrows(NullPointerException.class, () -> publisher.subscribe(null));
     }
 
     @ParameterizedTest
@@ -93,8 +96,9 @@ public class DelayProcessorTest {
     public void shouldThrowIllegalArgumentIfRequestedAmountNotValid(long count) throws Exception {
         ManualSubscriberWithSubscriptionSupport<String> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        DelayProcessor<String> processor = new DelayProcessor<>(1, TimeUnit.MILLISECONDS);
-        processor.subscribe(subscriber);
+        DelaySignalsPublisher<String> publisher =
+            new DelaySignalsPublisher<>(new ValuePublisher<>("test"), 1, TimeUnit.MILLISECONDS);
+        publisher.subscribe(subscriber);
         subscriber.request(count);
         subscriber.expectError(IllegalArgumentException.class);
         subscriber.expectNone();
