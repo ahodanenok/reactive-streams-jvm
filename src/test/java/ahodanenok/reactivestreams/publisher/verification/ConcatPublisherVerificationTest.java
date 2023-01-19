@@ -5,25 +5,25 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
 
+import ahodanenok.reactivestreams.LongRangePublisher;
 import ahodanenok.reactivestreams.publisher.ConcatPublisher;
-import ahodanenok.reactivestreams.publisher.IntRangePublisher;
 
-public class ConcatPublisherVerificationTest extends PublisherVerification<Integer> {
+public class ConcatPublisherVerificationTest extends PublisherVerification<Long> {
 
     public ConcatPublisherVerificationTest() {
         super(new TestEnvironment());
     }
 
     @Override
-    public Publisher<Integer> createPublisher(long elements) {
+    public Publisher<Long> createPublisher(long elements) {
         long mid = elements / 2;
         return new ConcatPublisher<>(List.of(
-            new IntRangePublisher(0, (int) mid),
-            new IntRangePublisher(0, (int) (elements - mid))));
+            new LongRangePublisher(0, mid),
+            new LongRangePublisher(0, elements - mid)));
     }
 
     @Override
-    public Publisher<Integer> createFailedPublisher() {
+    public Publisher<Long> createFailedPublisher() {
         return null;
     }
 
