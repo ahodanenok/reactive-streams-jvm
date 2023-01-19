@@ -32,7 +32,7 @@ public class DelaySignalsPublisher<T> implements Publisher<T> {
         publisher.subscribe(new DelaySignalsPublisherSubscription<>(subscriber, delay, unit));
     }
 
-    class DelaySignalsPublisherSubscription<T> extends ProcessingSubscription<T, T> {
+    class DelaySignalsPublisherSubscription<T> extends ProcessingSubscriber<T, T> {
 
         private final long delay;
         private final TimeUnit unit;

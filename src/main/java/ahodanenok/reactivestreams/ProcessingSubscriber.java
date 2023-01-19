@@ -3,14 +3,14 @@ package ahodanenok.reactivestreams;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-public abstract class ProcessingSubscription<T, R> implements Subscriber<T> {
+public abstract class ProcessingSubscriber<T, R> implements Subscriber<T> {
 
     protected final Subscriber<? super R> downstream;
 
     protected volatile Subscription upstream;
     protected volatile boolean cancelled;
 
-    public ProcessingSubscription(Subscriber<? super R> subscriber) {
+    public ProcessingSubscriber(Subscriber<? super R> subscriber) {
         if (subscriber == null) {
             throw new NullPointerException("subscriber is null");
         }
@@ -38,7 +38,7 @@ public abstract class ProcessingSubscription<T, R> implements Subscriber<T> {
 
             @Override
             public void cancel() {
-                ProcessingSubscription.this.cancel();
+                ProcessingSubscriber.this.cancel();
             }
         });
     }
