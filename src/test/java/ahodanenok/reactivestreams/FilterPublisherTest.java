@@ -1,4 +1,4 @@
-package ahodanenok.reactivestreams.processor;
+package ahodanenok.reactivestreams;
 
 import java.util.List;
 
@@ -14,15 +14,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import ahodanenok.reactivestreams.*;
 import ahodanenok.reactivestreams.publisher.*;
 
-public class FilterProcessorTest {
+public class FilterPublisherTest {
 
     @Test
     public void shouldFilterEmptyPublisher() throws Exception {
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        FilterProcessor<Integer> processor = new FilterProcessor<>(n -> true);
-        new EmptyPublisher<Integer>().subscribe(processor);
-        processor.subscribe(subscriber);
+        FilterPublisher<Integer> publisher = new FilterPublisher<>(new EmptyPublisher<>(), n -> true);
+        publisher.subscribe(subscriber);
         subscriber.expectNone();
         subscriber.expectCompletion();
         subscriber.expectNone();
@@ -32,9 +31,8 @@ public class FilterProcessorTest {
     public void shouldAcceptSingleValue() throws Exception {
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        FilterProcessor<Integer> processor = new FilterProcessor<>(n -> true);
-        new ValuePublisher<>(10).subscribe(processor);
-        processor.subscribe(subscriber);
+        FilterPublisher<Integer> publisher = new FilterPublisher<>(new ValuePublisher<>(10), n -> true);
+        publisher.subscribe(subscriber);
         subscriber.request(1);
         subscriber.expectNext(10);
         subscriber.expectCompletion();
@@ -45,9 +43,8 @@ public class FilterProcessorTest {
     public void shouldRejectSingleValue() throws Exception {
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        FilterProcessor<Integer> processor = new FilterProcessor<>(n -> false);
-        new ValuePublisher<>(10).subscribe(processor);
-        processor.subscribe(subscriber);
+        FilterPublisher<Integer> publisher = new FilterPublisher<>(new ValuePublisher<>(10), n -> false);
+        publisher.subscribe(subscriber);
         subscriber.request(1);
         subscriber.expectCompletion();
         subscriber.expectNone();
@@ -55,12 +52,11 @@ public class FilterProcessorTest {
 
 
     @Test
-    public void shouldAcceptAllValues() throws Exception {        
+    public void shouldAcceptAllValues() throws Exception {
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        FilterProcessor<Integer> processor = new FilterProcessor<>(n -> true);
-        new IterablePublisher<>(List.of(1, 3, 5, 7)).subscribe(processor);
-        processor.subscribe(subscriber);
+        FilterPublisher<Integer> publisher = new FilterPublisher<>(new IterablePublisher<>(List.of(1, 3, 5, 7)), n -> true);
+        publisher.subscribe(subscriber);
         subscriber.request(5);
         subscriber.expectNext(1);
         subscriber.expectNext(3);
@@ -71,12 +67,11 @@ public class FilterProcessorTest {
     }
 
     @Test
-    public void shouldRejectAllValues() throws Exception {        
+    public void shouldRejectAllValues() throws Exception {
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        FilterProcessor<Integer> processor = new FilterProcessor<>(n -> false);
-        new IterablePublisher<>(List.of(1, 3, 5, 7)).subscribe(processor);
-        processor.subscribe(subscriber);
+        FilterPublisher<Integer> publisher = new FilterPublisher<>(new IterablePublisher<>(List.of(1, 3, 5, 7)), n -> false);
+        publisher.subscribe(subscriber);
         subscriber.request(1);
         subscriber.expectCompletion();
         subscriber.expectNone();
@@ -84,12 +79,11 @@ public class FilterProcessorTest {
 
     @ParameterizedTest
     @ValueSource(ints = { 1, 3, 5, 7 })
-    public void shouldAcceptOneValueFromMultiple(int allowed) throws Exception {        
+    public void shouldAcceptOneValueFromMultiple(int allowed) throws Exception {
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        FilterProcessor<Integer> processor = new FilterProcessor<>(n -> n == allowed);
-        new IterablePublisher<>(List.of(1, 3, 5, 7)).subscribe(processor);
-        processor.subscribe(subscriber);
+        FilterPublisher<Integer> publisher = new FilterPublisher<>(new IterablePublisher<>(List.of(1, 3, 5, 7)), n -> n == allowed);
+        publisher.subscribe(subscriber);
         subscriber.request(1);
         subscriber.expectNext(allowed);
         subscriber.request(1);
@@ -98,12 +92,11 @@ public class FilterProcessorTest {
     }
 
     @Test
-    public void shouldAcceptSomeValuesFromMultiple() throws Exception {        
+    public void shouldAcceptSomeValuesFromMultiple() throws Exception {
         ManualSubscriberWithSubscriptionSupport<Integer> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        FilterProcessor<Integer> processor = new FilterProcessor<>(n -> n == 3 || n == 5);
-        new IterablePublisher<>(List.of(1, 3, 5, 7)).subscribe(processor);
-        processor.subscribe(subscriber);
+        FilterPublisher<Integer> publisher = new FilterPublisher<>(new IterablePublisher<>(List.of(1, 3, 5, 7)), n -> n == 3 || n == 5);
+        publisher.subscribe(subscriber);
         subscriber.request(1);
         subscriber.expectNext(3);
         subscriber.request(1);
@@ -117,22 +110,26 @@ public class FilterProcessorTest {
     public void shouldPassError() throws Exception {
         ManualSubscriberWithSubscriptionSupport<String> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        FilterProcessor<String> processor = new FilterProcessor<>(n -> true);
-        new ErrorPublisher<String>(new RuntimeException("error!")).subscribe(processor);
-        processor.subscribe(subscriber);
+        FilterPublisher<String> publisher = new FilterPublisher<>(new ErrorPublisher<>(new RuntimeException("error!")), n -> true);
+        publisher.subscribe(subscriber);
         subscriber.expectError(RuntimeException.class);
         subscriber.expectNone();
     }
 
     @Test
+    public void shouldThrowNpeIfPublisherNull() {
+        assertThrows(NullPointerException.class, () -> new FilterPublisher<String>(null, n -> true));
+    }
+
+    @Test
     public void shouldThrowNpeIfPredicateNull() {
-        assertThrows(NullPointerException.class, () -> new FilterProcessor<String>(null));
+        assertThrows(NullPointerException.class, () -> new FilterPublisher<String>(new EmptyPublisher<>(), null));
     }
 
     @Test
     public void shouldThrowNpeIfSubscriberNull() {
-        FilterProcessor<String> processor = new FilterProcessor<>(n -> true);
-        assertThrows(NullPointerException.class, () -> processor.subscribe(null));
+        FilterPublisher<String> publisher = new FilterPublisher<>(new EmptyPublisher<>(), n -> true);
+        assertThrows(NullPointerException.class, () -> publisher.subscribe(null));
     }
 
     @ParameterizedTest
@@ -140,8 +137,8 @@ public class FilterProcessorTest {
     public void shouldThrowIllegalArgumentIfRequestedAmountNotValid(long count) throws Exception {
         ManualSubscriberWithSubscriptionSupport<String> subscriber =
             new ManualSubscriberWithSubscriptionSupport<>(new TestEnvironment());
-        FilterProcessor<String> processor = new FilterProcessor<>(n -> true);
-        processor.subscribe(subscriber);
+        FilterPublisher<String> publisher = new FilterPublisher<>(new ValuePublisher("abc"), n -> true);
+        publisher.subscribe(subscriber);
         subscriber.request(count);
         subscriber.expectError(IllegalArgumentException.class);
         subscriber.expectNone();
