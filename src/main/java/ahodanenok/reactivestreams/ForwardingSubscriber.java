@@ -6,7 +6,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-public abstract class ForwardingSubscriber<T, R> implements Subscriber<R> {
+public abstract class ForwardingSubscriber<T, R> implements Subscriber<T> {
 
     protected final Subscriber<? super R> downstream;
     protected volatile Subscription upstream;

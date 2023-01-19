@@ -20,7 +20,7 @@ public class FilterPublisher<T> implements Publisher<T> {
 
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
-        publisher.subscribe(new FilterSubscriber(subscriber, predicate));
+        publisher.subscribe(new FilterSubscriber<>(subscriber, predicate));
     }
 
     private static class FilterSubscriber<T> extends ForwardingSubscriber<T, T> {
