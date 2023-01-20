@@ -1,12 +1,10 @@
-package ahodanenok.reactivestreams.publisher;
+package ahodanenok.reactivestreams;
 
 import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
-
-import ahodanenok.reactivestreams.channel.ErrorChannel;
 
 public class DeferPublisher<T> implements Publisher<T> {
 
@@ -22,10 +20,10 @@ public class DeferPublisher<T> implements Publisher<T> {
         Objects.requireNonNull(subscriber, "subscriber");
 
         Publisher<T> publisher = supplier.get();
-        if (publisher != null) {
-            publisher.subscribe(subscriber);
-        } else {
-            ErrorChannel.send(subscriber, new NullPointerException("Supplied publisher is null"));
+        if (publisher == null) {
+            publisher = new ErrorPublisher<>(new NullPointerException("Publisher supplier returned null"));
         }
+
+        publisher.subscribe(subscriber);
     }
 }

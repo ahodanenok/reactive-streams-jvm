@@ -1,13 +1,13 @@
-package ahodanenok.reactivestreams.publisher.verification;
+package ahodanenok.reactivestreams.verification;
 
 import java.util.stream.LongStream;
 
 import org.reactivestreams.*;
 import org.reactivestreams.tck.*;
 
-import ahodanenok.reactivestreams.publisher.DeferPublisher;
-import ahodanenok.reactivestreams.publisher.IterablePublisher;
+import ahodanenok.reactivestreams.DeferPublisher;
 import ahodanenok.reactivestreams.ErrorPublisher;
+import ahodanenok.reactivestreams.LongRangePublisher;
 
 public class DeferPublisherVerificationTest extends PublisherVerification<Long> {
 
@@ -17,7 +17,7 @@ public class DeferPublisherVerificationTest extends PublisherVerification<Long> 
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        return new DeferPublisher<>(() -> new IterablePublisher(() -> LongStream.range(0, elements).iterator()));
+        return new DeferPublisher<>(() -> new LongRangePublisher(0, elements));
     }
 
     @Override
