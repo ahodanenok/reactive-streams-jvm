@@ -1,4 +1,4 @@
-package ahodanenok.reactivestreams.publisher.verification;
+package ahodanenok.reactivestreams.verification;
 
 import java.util.stream.LongStream;
 
@@ -6,7 +6,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
 
-import ahodanenok.reactivestreams.publisher.IterablePublisher;
+import ahodanenok.reactivestreams.IterablePublisher;
 
 public class IterablePublisherVerificationTest extends PublisherVerification<Long> {
 
