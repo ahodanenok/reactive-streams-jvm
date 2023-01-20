@@ -7,7 +7,7 @@ import org.reactivestreams.tck.TestEnvironment;
 
 import ahodanenok.reactivestreams.publisher.WhenAllCompletedPublisher;
 import ahodanenok.reactivestreams.ValuePublisher;
-import ahodanenok.reactivestreams.publisher.ErrorPublisher;
+import ahodanenok.reactivestreams.ErrorPublisher;
 
 public class WhenAllCompletedPublisherVerificationTest extends PublisherVerification<String> {
 

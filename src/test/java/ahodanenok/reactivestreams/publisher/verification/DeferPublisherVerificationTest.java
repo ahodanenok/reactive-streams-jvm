@@ -7,7 +7,7 @@ import org.reactivestreams.tck.*;
 
 import ahodanenok.reactivestreams.publisher.DeferPublisher;
 import ahodanenok.reactivestreams.publisher.IterablePublisher;
-import ahodanenok.reactivestreams.publisher.ErrorPublisher;
+import ahodanenok.reactivestreams.ErrorPublisher;
 
 public class DeferPublisherVerificationTest extends PublisherVerification<Long> {
 

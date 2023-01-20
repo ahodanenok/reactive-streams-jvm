@@ -4,9 +4,9 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
 
+import ahodanenok.reactivestreams.ErrorPublisher;
 import ahodanenok.reactivestreams.FilterPublisher;
 import ahodanenok.reactivestreams.LongRangePublisher;
-import ahodanenok.reactivestreams.publisher.ErrorPublisher;
 
 public class FilterPublisherVerificationTest extends PublisherVerification<Long> {
 

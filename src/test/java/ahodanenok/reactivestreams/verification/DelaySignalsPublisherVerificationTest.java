@@ -7,8 +7,8 @@ import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
 
 import ahodanenok.reactivestreams.DelaySignalsPublisher;
+import ahodanenok.reactivestreams.ErrorPublisher;
 import ahodanenok.reactivestreams.LongRangePublisher;
-import ahodanenok.reactivestreams.publisher.ErrorPublisher;
 
 public class DelaySignalsPublisherVerificationTest extends PublisherVerification<Long> {
 

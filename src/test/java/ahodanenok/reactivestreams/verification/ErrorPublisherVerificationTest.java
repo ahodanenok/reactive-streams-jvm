@@ -1,10 +1,10 @@
-package ahodanenok.reactivestreams.publisher.verification;
+package ahodanenok.reactivestreams.verification;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
 
-import ahodanenok.reactivestreams.publisher.ErrorPublisher;
+import ahodanenok.reactivestreams.ErrorPublisher;
 
 public class ErrorPublisherVerificationTest extends PublisherVerification<Integer> {
 
