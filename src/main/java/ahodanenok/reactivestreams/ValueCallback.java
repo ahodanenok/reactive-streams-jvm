@@ -1,7 +1,6 @@
-package ahodanenok.reactivestreams.publisher;
+package ahodanenok.reactivestreams;
 
 import java.util.Objects;
-import org.reactivestreams.Subscriber;
 
 public interface ValueCallback<T> {
 
