@@ -1,4 +1,4 @@
-package ahodanenok.reactivestreams.publisher;
+package ahodanenok.reactivestreams;
 
 import java.util.concurrent.CompletableFuture;
 
