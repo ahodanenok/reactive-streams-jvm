@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ahodanenok.reactivestreams.*;
-import ahodanenok.reactivestreams.publisher.*;
 
 public class FilterPublisherTest {
 
